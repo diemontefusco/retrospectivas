@@ -4098,8 +4098,8 @@ function renderAdminToolFeedbackSection() {
       ` : `<p style="opacity:.65;margin:1rem 0 0">Todavía no hay sugerencias recibidas desde el footer.</p>`}
     </div>
 
-    <div style="margin-top:32px;padding-top:28px;border-top:1px solid rgba(255,255,255,.08)">
-      <div class="badge">FEEDBACK SOBRE LA HERRAMIENTA EN LAS RETROS</div>
+    <div style="margin-top:32px">
+      <div class="badge">SUGERENCIAS DESDE RETROS</div>
       ${retroItems.length ? `
         <div class="admin-feedback-list">
           ${retroItems.map(adminRetroToolFeedbackRow).join("")}

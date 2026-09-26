@@ -4131,8 +4131,30 @@ async function refreshAdminToolFeedback() {
   adminToolFeedbackRefreshing = true;
   try {
     const previousSignature = adminToolFeedbackSignature();
-    await loadAdminToolFeedback();
-    await loadAdminRetroToolFeedback();
+
+    // Cargamos ambas fuentes antes de reemplazar el estado visual.
+    // Si una consulta falla o devuelve una respuesta vacía inesperada,
+    // no pisamos el feedback de retros que ya estaba visible.
+    const { data: footerData, error: footerError } = await supabaseClient.rpc("get_admin_tool_feedback");
+    if (footerError) throw footerError;
+
+    const { data: retroData, error: retroError } = await supabaseClient.rpc("get_admin_retro_tool_feedback");
+    if (retroError) throw retroError;
+
+    const nextFooter = footerData || [];
+    const nextRetro = retroData || [];
+
+    // Una respuesta vacía del RPC de retros no debe hacer desaparecer
+    // datos que ya estaban cargados en Admin. Se conserva el estado anterior
+    // y se registra el caso para poder detectar el problema del backend.
+    if (adminRetroToolFeedback.length > 0 && nextRetro.length === 0) {
+      console.warn("El RPC get_admin_retro_tool_feedback devolvió 0 registros mientras Admin ya tenía feedback de retros. Se conserva el estado visible.");
+    } else {
+      adminRetroToolFeedback = nextRetro;
+    }
+
+    adminToolFeedback = nextFooter;
+
     const nextSignature = adminToolFeedbackSignature();
     if (previousSignature !== nextSignature) {
       renderAdminToolFeedbackSection();

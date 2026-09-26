@@ -11,7 +11,7 @@ button,input,textarea { font:inherit; }
 .app { min-height:100vh; display:flex; flex-direction:column; }
 .topbar { background:var(--bg); position:sticky; top:0; z-index:1000; height:4.5rem; display:flex; align-items:center; gap:1.75rem; padding:0 5vw; border-bottom:0.0625rem solid var(--line); }
 .brand { font-weight:800; letter-spacing:.12em; }
-.brand-dot { display: inline-block; width: 0.5625rem; height: 0.5625rem; border-radius: 50%; background: #21dbaa; margin-right: 0.3rem; padding: 0.4rem; }
+.brand-dot { display: inline-block; width: 0.5625rem; height: 0.5625rem; background: #21dbaa; margin-right: 0.3rem; padding: 0.4rem; }
 .session { color:var(--muted); font-size:0.75rem; letter-spacing:.1em; }
 .progress { margin-left:auto; width:11.25rem; height:0.25rem; background:#20232b; border-radius:6.1875rem; overflow:hidden; }
 .progress span { display:block; height:100%; width:12.5%; background:white; transition:.35s; }

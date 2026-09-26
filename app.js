@@ -55,6 +55,7 @@ const state = {
 
   // Retro actual
   retroId: null,
+  retroTitle: null,
 
   // Preguntas de la conversación
   guidingQuestions: [],
@@ -1752,7 +1753,7 @@ async function refreshRetroState() {
   } = await supabaseClient
     .from("retros")
     .select(
-      "id, codigo, nombre, paso_actual, facilitador_session_id, facilitador_nombre, iniciada, iniciada_en, finalizada_en"
+      "id, codigo, nombre, titulo, paso_actual, facilitador_session_id, facilitador_nombre, iniciada, iniciada_en, finalizada_en"
     )
     .eq("id", state.retroId)
     .single();
@@ -1768,6 +1769,9 @@ async function refreshRetroState() {
     return;
   }
 
+
+  state.retroTitle =
+    data.titulo || null;
 
   state.step =
     normalizeStepForTopics(Number(data.paso_actual || 0));
@@ -2263,6 +2267,11 @@ function render() {
 
   const toolFeedbackBtn = document.querySelector("#toolFeedbackBtn");
   if (toolFeedbackBtn) toolFeedbackBtn.style.display = "none";
+
+  const brand = document.querySelector(".brand");
+  if (brand) {
+    brand.innerHTML = `<span class="brand-dot"></span> RETROS${state.retroTitle ? ` <span class="retro-title-divider">·</span> <span class="retro-title-text">${escapeHtml(state.retroTitle)}</span>` : ""}`;
+  }
 
   if (state.retroFinishedAt && state.step === steps.length - 1 && state.showFeedback) {
     stepLabel.textContent = "Feedback";
@@ -3640,6 +3649,10 @@ function landingShell(content) {
           <button id="landingHistoryNavBtn" class="ghost landing-nav-btn">Ver retros</button>
           <button id="landingNewRetroNavBtn" class="primary landing-nav-btn">Nueva retro +</button>
         </nav>
+      ` : landingView === "create" ? `
+        <nav class="landing-nav">
+          <button id="landingBackBtn" class="ghost landing-nav-btn">← Volver</button>
+        </nav>
       ` : ""}
     `;
   }
@@ -3698,6 +3711,7 @@ function landingHome() {
 }
 
 function landingRetroRow(retro) {
+  const title = escapeHtml(retro.titulo || "Retrospectiva");
   const teams = escapeHtml(retro.equipos || retro.nombre || "Equipos no definidos");
   const date = escapeHtml(formatLandingDate(retro.fecha));
   const finished = Boolean(retro.finalizada_en);
@@ -3706,7 +3720,8 @@ function landingRetroRow(retro) {
   return `
     <div style="display:flex;justify-content:space-between;align-items:center;gap:18px;padding:18px 0;border-bottom:1px solid rgba(255,255,255,.08);flex-wrap:wrap">
       <div style="min-width:260px;flex:1">
-        <div style="font-size:18px;font-weight:700">${teams} · ${date}</div>
+        <div style="font-size:18px;font-weight:700">${title}</div>
+        <div style="opacity:.72;margin-top:5px">${teams} · ${date}</div>
         <div style="opacity:.65;margin-top:5px">${status}</div>
       </div>
       <div class="landing-history-actions">
@@ -3722,15 +3737,18 @@ function landingRetroRow(retro) {
 function landingCreateForm() {
   return `
     <section style="max-width:760px;margin:0 auto;padding:56px 20px 80px">
-      <button id="landingBackBtn" style="padding:9px 13px;margin-bottom:30px">← Volver</button>
-      <div class="eyebrow">Nueva retrospectiva</div>
       <h2 style="margin-top:10px">Prepará una nueva sesión</h2>
-      <p class="lead">Indicá quiénes van a participar y la fecha de la retrospectiva.</p>
+      <p class="lead">Definí el título, los equipos que participan y la fecha de la retrospectiva.</p>
       <div class="card" style="margin-top:28px">
-        <label class="badge" for="retroTeams">EQUIPO(S) PARTICIPANTE(S) · OBLIGATORIO</label>
-        <input id="retroTeams" type="text" placeholder="Ej. Playback, Catálogo y Contenido" style="width:100%;margin-top:10px;padding:13px;border-radius:10px;background:#111;color:inherit;border:1px solid rgba(255,255,255,.18)" autocomplete="off">
-        <label class="badge" for="retroDate" style="display:block;margin-top:24px">FECHA · OBLIGATORIO</label>
-        <input id="retroDate" type="date" value="${todayLocalISO()}" style="width:100%;margin-top:10px;padding:13px;border-radius:10px;background:#111;color:inherit;border:1px solid rgba(255,255,255,.18)">
+        <label class="landing-form-label" for="retroTitle">TÍTULO <span class="required-marker">*</span></label>
+        <input id="retroTitle" type="text" placeholder="Ej. Retro de Playback · Q3" maxlength="160" autocomplete="off">
+
+        <label class="landing-form-label" for="retroTeams">EQUIPOS QUE PARTICIPAN <span class="required-marker">*</span></label>
+        <input id="retroTeams" type="text" placeholder="Ej. Playback, Catálogo y Contenido" autocomplete="off">
+
+        <label class="landing-form-label" for="retroDate">FECHA <span class="required-marker">*</span></label>
+        <input id="retroDate" type="date" value="${todayLocalISO()}">
+
         <button id="createRetroBtn" class="primary" style="margin-top:26px;width:100%;padding:14px">Crear retrospectiva →</button>
       </div>
     </section>
@@ -3775,8 +3793,8 @@ function landingSummaryView(summary) {
     <section style="max-width:980px;margin:0 auto;padding:48px 20px 80px">
       <button id="landingBackBtn" style="padding:9px 13px">← Volver al historial</button>
       <div class="eyebrow" style="margin-top:30px">Resumen de retrospectiva</div>
-      <h2 style="margin-top:10px">${escapeHtml(retro.equipos || retro.nombre || "Retrospectiva")}</h2>
-      <p class="lead">${formatLandingDate(retro.fecha)}${retro.finalizada_en ? ` · Finalizada ${new Date(retro.finalizada_en).toLocaleString("es-AR")}` : ""}</p>
+      <h2 style="margin-top:10px">${escapeHtml(retro.titulo || "Retrospectiva")}</h2>
+      <p class="lead">${escapeHtml(retro.equipos || retro.nombre || "Equipos no definidos")} · ${formatLandingDate(retro.fecha)}${retro.finalizada_en ? ` · Finalizada ${new Date(retro.finalizada_en).toLocaleString("es-AR")}` : ""}</p>
 
       <div class="card" style="margin-top:26px">
         <div class="eyebrow">Tema principal</div>
@@ -3811,7 +3829,8 @@ function landingFeedbackView(data) {
     <section style="max-width:980px;margin:0 auto;padding:48px 20px 80px">
       <button id="landingBackBtn" style="padding:9px 13px">← Volver al historial</button>
       <div class="eyebrow" style="margin-top:30px">Feedback de la retrospectiva</div>
-      <h2 style="margin-top:10px">${escapeHtml(data?.retro?.equipos || data?.retro?.nombre || "Retrospectiva")}</h2>
+      <h2 style="margin-top:10px">${escapeHtml(data?.retro?.titulo || "Retrospectiva")}</h2>
+      <p class="lead">${escapeHtml(data?.retro?.equipos || data?.retro?.nombre || "Equipos no definidos")}${data?.retro?.fecha ? ` · ${formatLandingDate(data.retro.fecha)}` : ""}</p>
       <div class="grid" style="margin-top:24px">
         <div class="card"><div class="eyebrow">Respuestas</div><div class="big-number">${rows.length}</div></div>
         <div class="card"><div class="eyebrow">Promedio</div><div class="big-number">${avg == null ? "—" : Number(avg).toFixed(1)}</div><p style="opacity:.65">sobre 10</p></div>
@@ -3832,6 +3851,22 @@ async function loadLandingRetros() {
     return;
   }
   landingRetros = data || [];
+
+  const retroIds = landingRetros.map(retro => retro.id).filter(Boolean);
+  if (retroIds.length) {
+    const { data: titleRows, error: titleError } = await supabaseClient
+      .from("retros")
+      .select("id, titulo")
+      .in("id", retroIds);
+
+    if (!titleError) {
+      const titlesById = new Map((titleRows || []).map(row => [row.id, row.titulo]));
+      landingRetros = landingRetros.map(retro => ({
+        ...retro,
+        titulo: retro.titulo || titlesById.get(retro.id) || null
+      }));
+    }
+  }
 }
 
 async function renderLanding() {
@@ -3885,6 +3920,18 @@ function bindLanding() {
       const { data, error } = await supabaseClient.rpc("get_retro_summary", { p_retro_id: btn.dataset.retroId });
       btn.disabled = false;
       if (error) return alert("No se pudo cargar el resumen.\n\n" + error.message);
+
+      const { data: retroMeta } = await supabaseClient
+        .from("retros")
+        .select("titulo, nombre, fecha")
+        .eq("id", btn.dataset.retroId)
+        .maybeSingle();
+
+      const summaryRetro = {
+        ...(data?.retro || {}),
+        ...(retroMeta || {})
+      };
+
       const { data: questionAnswers, error: questionAnswersError } = await supabaseClient
         .from("preguntas_guia")
         .select("id, pregunta, respuesta, topic_key, origen, orden, created_at")
@@ -3892,7 +3939,7 @@ function bindLanding() {
         .order("orden", { ascending: true })
         .order("created_at", { ascending: true });
       if (questionAnswersError) return alert("No se pudieron cargar las respuestas de las preguntas.\n\n" + questionAnswersError.message);
-      landingSelectedRetro = { ...(data || {}), questions: questionAnswers || [] };
+      landingSelectedRetro = { ...(data || {}), retro: summaryRetro, questions: questionAnswers || [] };
       landingView = "summary";
       renderLanding();
     };
@@ -3909,7 +3956,20 @@ function bindLanding() {
       const { data, error } = await supabaseClient.rpc("get_retro_feedback_summary", { p_retro_id: btn.dataset.retroId });
       btn.disabled = false;
       if (error) return alert("No se pudo cargar el feedback.\n\n" + error.message);
-      landingSelectedRetro = data;
+
+      const { data: retroMeta } = await supabaseClient
+        .from("retros")
+        .select("titulo, nombre, fecha")
+        .eq("id", btn.dataset.retroId)
+        .maybeSingle();
+
+      landingSelectedRetro = {
+        ...(data || {}),
+        retro: {
+          ...(data?.retro || {}),
+          ...(retroMeta || {})
+        }
+      };
       landingView = "feedback";
       renderLanding();
     };
@@ -3925,15 +3985,28 @@ function bindLanding() {
 
   const createBtn = document.querySelector("#createRetroBtn");
   if (createBtn) createBtn.onclick = async () => {
+    const title = document.querySelector("#retroTitle")?.value.trim();
     const teams = document.querySelector("#retroTeams")?.value.trim();
     const date = document.querySelector("#retroDate")?.value || todayLocalISO();
-    if (!teams) return alert("Ingresá el nombre del equipo o equipos participantes.");
-    createBtn.disabled = true; createBtn.textContent = "Creando…";
-    const { data, error } = await supabaseClient.rpc("create_retro", { p_equipos: teams, p_fecha: date });
+
+    if (!title) return alert("Ingresá el título de la retrospectiva.");
+    if (!teams) return alert("Ingresá los equipos que participan.");
+
+    createBtn.disabled = true;
+    createBtn.textContent = "Creando…";
+
+    const { data, error } = await supabaseClient.rpc("create_retro_with_title", {
+      p_titulo: title,
+      p_equipos: teams,
+      p_fecha: date
+    });
+
     if (error) {
-      createBtn.disabled = false; createBtn.textContent = "Crear retrospectiva →";
+      createBtn.disabled = false;
+      createBtn.textContent = "Crear retrospectiva →";
       return alert("No se pudo crear la retrospectiva.\n\n" + error.message);
     }
+
     window.location.href = `?retro=${encodeURIComponent(data.codigo)}`;
   };
 }
@@ -4012,6 +4085,7 @@ function adminToolFeedbackRow(item) {
 }
 
 function adminRetroRow(retro) {
+  const title = escapeHtml(retro.titulo || "Retrospectiva");
   const teams = escapeHtml(retro.equipos || retro.nombre || "Equipos no definidos");
   const date = escapeHtml(formatLandingDate(retro.fecha));
   const published = !!retro.publicada;
@@ -4037,7 +4111,22 @@ function adminRetroRow(retro) {
 async function loadAdminRetros() {
   const { data, error } = await supabaseClient.rpc("get_admin_retro_history");
   if (error) throw error;
+
   adminRetros = data || [];
+
+  const retroIds = adminRetros.map(retro => retro.id).filter(Boolean);
+  if (retroIds.length) {
+    const { data: titleRows } = await supabaseClient
+      .from("retros")
+      .select("id, titulo")
+      .in("id", retroIds);
+
+    const titlesById = new Map((titleRows || []).map(row => [row.id, row.titulo]));
+    adminRetros = adminRetros.map(retro => ({
+      ...retro,
+      titulo: retro.titulo || titlesById.get(retro.id) || null
+    }));
+  }
 }
 
 async function loadAdminToolFeedback() {
@@ -4254,7 +4343,7 @@ async function loadRetro() {
     await supabaseClient
       .from("retros")
       .select(
-        "id, codigo, nombre, paso_actual, facilitador_session_id, facilitador_nombre, iniciada, iniciada_en, finalizada_en"
+        "id, codigo, nombre, titulo, paso_actual, facilitador_session_id, facilitador_nombre, iniciada, iniciada_en, finalizada_en"
       )
       .eq("codigo", RETRO_CODE)
       .single();
@@ -4276,6 +4365,9 @@ async function loadRetro() {
 
   state.retroId =
     data.id;
+
+  state.retroTitle =
+    data.titulo || null;
 
   state.step =
     Number(data.paso_actual || 0);

@@ -2261,9 +2261,6 @@ function render() {
     return;
   }
 
-  const toolFeedbackBtn = document.querySelector("#toolFeedbackBtn");
-  if (toolFeedbackBtn) toolFeedbackBtn.style.display = "none";
-
   if (state.retroFinishedAt && state.step === steps.length - 1 && state.showFeedback) {
     stepLabel.textContent = "Feedback";
     progressBar.style.width = "100%";
@@ -3463,153 +3460,6 @@ let landingRetros = [];
 let landingView = "home";
 let landingSelectedRetro = null;
 
-// =====================================================
-// FEEDBACK DE LA HERRAMIENTA
-// =====================================================
-
-function closeToolFeedbackModal() {
-  const modal = document.querySelector("#toolFeedbackModal");
-  if (!modal) return;
-  modal.classList.remove("is-open");
-  modal.setAttribute("aria-hidden", "true");
-}
-
-function resetToolFeedbackModal() {
-  const input = document.querySelector("#toolFeedbackInput");
-  const status = document.querySelector("#toolFeedbackStatus");
-  const counter = document.querySelector("#toolFeedbackCounter");
-  const submitBtn = document.querySelector("#toolFeedbackSubmitBtn");
-  const cancelBtn = document.querySelector(".tool-feedback-cancel");
-  const closeBtn = document.querySelector("#toolFeedbackCloseBtn");
-  const actions = document.querySelector(".tool-feedback-actions");
-  const meta = document.querySelector(".tool-feedback-meta");
-  const title = document.querySelector("#toolFeedbackTitle");
-  const lead = document.querySelector("#toolFeedbackModal .lead");
-
-  document.querySelector("#toolFeedbackDialog")?.classList.remove("is-confirmation");
-  if (title) title.textContent = "¿Qué mejorarías de la herramienta?";
-  if (lead) lead.textContent = "Contanos qué te gustaría cambiar, mejorar o sumar.";
-  if (input) {
-    input.value = "";
-    input.hidden = false;
-  }
-  if (counter) {
-    counter.textContent = "0 / 2000";
-    counter.hidden = false;
-  }
-  if (meta) meta.hidden = false;
-  if (actions) actions.hidden = false;
-  if (closeBtn) closeBtn.hidden = false;
-  if (cancelBtn) {
-    cancelBtn.hidden = false;
-    cancelBtn.textContent = "Cancelar";
-    cancelBtn.classList.remove("primary");
-    cancelBtn.classList.add("ghost");
-  }
-  if (submitBtn) {
-    submitBtn.hidden = false;
-    submitBtn.disabled = false;
-    submitBtn.textContent = "Enviar feedback →";
-  }
-  if (status) {
-    status.classList.remove("is-visible");
-    status.textContent = "";
-  }
-}
-
-function openToolFeedbackModal() {
-  const modal = document.querySelector("#toolFeedbackModal");
-  const input = document.querySelector("#toolFeedbackInput");
-  if (!modal) return;
-  resetToolFeedbackModal();
-  modal.classList.add("is-open");
-  modal.setAttribute("aria-hidden", "false");
-  if (input) input.focus();
-}
-
-function bindToolFeedback() {
-  const openBtn = document.querySelector("#toolFeedbackBtn");
-  const closeBtn = document.querySelector("#toolFeedbackCloseBtn");
-  const submitBtn = document.querySelector("#toolFeedbackSubmitBtn");
-  const input = document.querySelector("#toolFeedbackInput");
-  const counter = document.querySelector("#toolFeedbackCounter");
-
-  if (openBtn) openBtn.onclick = openToolFeedbackModal;
-  if (closeBtn) closeBtn.onclick = closeToolFeedbackModal;
-  document.querySelectorAll("[data-tool-feedback-close]").forEach(el => {
-    el.onclick = closeToolFeedbackModal;
-  });
-
-  if (input && counter) {
-    input.oninput = () => {
-      counter.textContent = `${input.value.length} / 2000`;
-    };
-  }
-
-  if (submitBtn) {
-    submitBtn.onclick = async () => {
-      const feedback = String(input?.value || "").trim();
-      const status = document.querySelector("#toolFeedbackStatus");
-      if (!feedback) {
-        if (status) {
-          status.textContent = "Escribí una sugerencia antes de enviarla.";
-          status.classList.add("is-visible");
-        }
-        input?.focus();
-        return;
-      }
-
-      submitBtn.disabled = true;
-      submitBtn.textContent = "Enviando…";
-
-      const { error } = await supabaseClient.rpc("submit_tool_feedback", {
-        p_feedback: feedback
-      });
-
-      if (error) {
-        submitBtn.disabled = false;
-        submitBtn.textContent = "Enviar feedback →";
-        if (status) {
-          status.textContent = "No se pudo guardar el feedback.\n\n" + error.message;
-          status.classList.add("is-visible");
-        }
-        return;
-      }
-
-      submitBtn.disabled = false;
-      submitBtn.textContent = "Enviar feedback →";
-      const dialog = document.querySelector("#toolFeedbackDialog");
-      const actions = document.querySelector(".tool-feedback-actions");
-      const meta = document.querySelector(".tool-feedback-meta");
-      const title = document.querySelector("#toolFeedbackTitle");
-      const lead = document.querySelector("#toolFeedbackModal .lead");
-      const cancelBtn = document.querySelector(".tool-feedback-cancel");
-      const closeBtn = document.querySelector("#toolFeedbackCloseBtn");
-
-      if (input) input.hidden = true;
-      if (counter) counter.hidden = true;
-      if (meta) meta.hidden = true;
-      if (dialog) dialog.classList.add("is-confirmation");
-      if (closeBtn) closeBtn.hidden = true;
-      if (actions) actions.hidden = false;
-      if (cancelBtn) {
-        cancelBtn.hidden = false;
-        cancelBtn.textContent = "Volver a la APP";
-        cancelBtn.classList.remove("ghost");
-        cancelBtn.classList.add("primary");
-      }
-      if (submitBtn) submitBtn.hidden = true;
-      if (title) title.textContent = "¡Gracias!";
-      if (lead) lead.textContent = "Tu feedback fue enviado correctamente.";
-      if (status) {
-        status.textContent = "";
-        status.classList.remove("is-visible");
-      }
-    };
-  }
-}
-
-
 function todayLocalISO() {
   const d = new Date();
   const local = new Date(d.getTime() - d.getTimezoneOffset() * 60000);
@@ -3638,12 +3488,7 @@ function landingShell(content) {
       ${landingView === "home" ? `
         <nav class="landing-nav">
           <button id="landingHistoryNavBtn" class="ghost landing-nav-btn">Ver retros</button>
-          <button id="landingNewRetroNavBtn" class="primary landing-nav-btn">Nueva retro +</button>
-        </nav>
-      ` : landingView === "feedback" ? `
-        <nav class="landing-nav">
-          <button id="landingFeedbackBackNavBtn" class="ghost landing-nav-btn">← Volver</button>
-          <button id="landingNewRetroNavBtn" class="primary landing-nav-btn">Nueva retro +</button>
+          <button id="landingNewRetroNavBtn" class="primary landing-nav-btn">+ Nueva retro</button>
         </nav>
       ` : ""}
     `;
@@ -3653,8 +3498,6 @@ function landingShell(content) {
   if (progressBar) progressBar.style.width = "0%";
   if (backBtn) { backBtn.style.display = "none"; backBtn.disabled = true; }
   if (nextBtn) nextBtn.style.display = "none";
-  const toolFeedbackBtn = document.querySelector("#toolFeedbackBtn");
-  if (toolFeedbackBtn) toolFeedbackBtn.style.display = "inline-flex";
   if (app) app.innerHTML = content;
 }
 
@@ -3705,21 +3548,17 @@ function landingHome() {
 function landingRetroRow(retro) {
   const teams = escapeHtml(retro.equipos || retro.nombre || "Equipos no definidos");
   const date = escapeHtml(formatLandingDate(retro.fecha));
-  const finished = Boolean(retro.finalizada_en);
-  const started = Boolean(retro.iniciada);
-  const status = finished ? "Finalizada" : started ? "En curso" : "En preparación";
+  const status = retro.finalizada_en ? "Finalizada" : "En preparación";
   return `
     <div style="display:flex;justify-content:space-between;align-items:center;gap:18px;padding:18px 0;border-bottom:1px solid rgba(255,255,255,.08);flex-wrap:wrap">
       <div style="min-width:260px;flex:1">
         <div style="font-size:18px;font-weight:700">${teams} · ${date}</div>
         <div style="opacity:.65;margin-top:5px">${status}</div>
       </div>
-      <div class="landing-history-actions">
-        <button class="landing-summary-btn ${finished ? "" : "landing-disabled-action"}" data-retro-id="${retro.id}" data-disabled-action="${finished ? "false" : "true"}" ${finished ? "" : "aria-disabled=\"true\""} style="padding:9px 13px">Ver resumen</button>
-        <button class="landing-feedback-btn ${finished ? "" : "landing-disabled-action"}" data-retro-id="${retro.id}" data-disabled-action="${finished ? "false" : "true"}" ${finished ? "" : "aria-disabled=\"true\""} style="padding:9px 13px">Ver feedback</button>
-        ${!finished ? `<button class="landing-join-btn primary" data-retro-code="${escapeHtml(retro.codigo || "")}" style="padding:9px 13px">Unirse a la retro →</button>` : ""}
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="landing-summary-btn" data-retro-id="${retro.id}" style="padding:9px 13px">Ver resumen</button>
+        <button class="landing-feedback-btn" data-retro-id="${retro.id}" style="padding:9px 13px">Ver feedback</button>
       </div>
-      ${!finished ? `<div class="landing-disabled-notice" data-disabled-notice="${retro.id}">El resumen y el feedback se van a habilitar una vez que la retrospectiva finalice.</div>` : ""}
     </div>
   `;
 }
@@ -3813,16 +3652,17 @@ function landingFeedbackView(data) {
   const rows = data?.feedback || [];
   const avg = data?.average_rating;
   return `
-    <section class="landing-feedback-view">
-      <div class="eyebrow">Feedback de la retrospectiva</div>
+    <section style="max-width:980px;margin:0 auto;padding:48px 20px 80px">
+      <button id="landingBackBtn" style="padding:9px 13px">← Volver al historial</button>
+      <div class="eyebrow" style="margin-top:30px">Feedback de la retrospectiva</div>
       <h2 style="margin-top:10px">${escapeHtml(data?.retro?.equipos || data?.retro?.nombre || "Retrospectiva")}</h2>
       <div class="grid" style="margin-top:24px">
         <div class="card"><div class="eyebrow">Respuestas</div><div class="big-number">${rows.length}</div></div>
         <div class="card"><div class="eyebrow">Promedio</div><div class="big-number">${avg == null ? "—" : Number(avg).toFixed(1)}</div><p style="opacity:.65">sobre 10</p></div>
       </div>
       <div class="card" style="margin-top:20px">
-        <div class="eyebrow">Observaciones</div>
-        ${rows.length ? rows.map(r=>`<div style="padding:18px 0;border-bottom:1px solid rgba(255,255,255,.08)"><div style="font-weight:700">${r.rating}/10</div><p style="margin:8px 0">${escapeHtml(r.observaciones)}</p></div>`).join("") : `<p style="opacity:.65">Todavía no hay feedback cargado para esta retrospectiva.</p>`}
+        <div class="eyebrow">Comentarios</div>
+        ${rows.length ? rows.map(r=>`<div style="padding:18px 0;border-bottom:1px solid rgba(255,255,255,.08)"><div style="font-weight:700">${r.rating}/10</div><p style="margin:8px 0">${escapeHtml(r.observaciones)}</p>${r.feedback_herramienta ? `<p style="margin:8px 0;opacity:.7"><strong>Herramienta:</strong> ${escapeHtml(r.feedback_herramienta)}</p>` : ""}</div>`).join("") : `<p style="opacity:.65">Todavía no hay feedback cargado para esta retrospectiva.</p>`}
       </div>
     </section>
   `;
@@ -3878,32 +3718,26 @@ function bindLanding() {
   const back = document.querySelector("#landingBackBtn");
   if (back) back.onclick = async () => { landingView = "home"; await loadLandingRetros(); renderLanding(); };
 
-  const feedbackBackNavBtn = document.querySelector("#landingFeedbackBackNavBtn");
-  if (feedbackBackNavBtn) feedbackBackNavBtn.onclick = async () => {
-    landingView = "home";
-    await loadLandingRetros();
-    renderLanding();
-  };
-
   document.querySelectorAll(".landing-summary-btn").forEach(btn => {
     btn.onclick = async () => {
-      if (btn.dataset.disabledAction === "true") {
-        const notice = document.querySelector(`[data-disabled-notice="${btn.dataset.retroId}"]`);
-        if (notice) notice.classList.toggle("is-visible");
-        return;
-      }
       btn.disabled = true;
       const { data, error } = await supabaseClient.rpc("get_retro_summary", { p_retro_id: btn.dataset.retroId });
       btn.disabled = false;
       if (error) return alert("No se pudo cargar el resumen.\n\n" + error.message);
+
       const { data: questionAnswers, error: questionAnswersError } = await supabaseClient
         .from("preguntas_guia")
         .select("id, pregunta, respuesta, topic_key, origen, orden, created_at")
         .eq("retro_id", btn.dataset.retroId)
         .order("orden", { ascending: true })
         .order("created_at", { ascending: true });
+
       if (questionAnswersError) return alert("No se pudieron cargar las respuestas de las preguntas.\n\n" + questionAnswersError.message);
-      landingSelectedRetro = { ...(data || {}), questions: questionAnswers || [] };
+
+      landingSelectedRetro = {
+        ...(data || {}),
+        questions: questionAnswers || []
+      };
       landingView = "summary";
       renderLanding();
     };
@@ -3911,11 +3745,6 @@ function bindLanding() {
 
   document.querySelectorAll(".landing-feedback-btn").forEach(btn => {
     btn.onclick = async () => {
-      if (btn.dataset.disabledAction === "true") {
-        const notice = document.querySelector(`[data-disabled-notice="${btn.dataset.retroId}"]`);
-        if (notice) notice.classList.toggle("is-visible");
-        return;
-      }
       btn.disabled = true;
       const { data, error } = await supabaseClient.rpc("get_retro_feedback_summary", { p_retro_id: btn.dataset.retroId });
       btn.disabled = false;
@@ -3923,14 +3752,6 @@ function bindLanding() {
       landingSelectedRetro = data;
       landingView = "feedback";
       renderLanding();
-    };
-  });
-
-  document.querySelectorAll(".landing-join-btn").forEach(btn => {
-    btn.onclick = () => {
-      const code = String(btn.dataset.retroCode || "").trim();
-      if (!code) return alert("No se encontró el código de la retrospectiva.");
-      window.location.href = `?retro=${encodeURIComponent(code)}`;
     };
   });
 
@@ -3955,7 +3776,6 @@ function bindLanding() {
 // =====================================================
 
 let adminRetros = [];
-let adminToolFeedback = [];
 
 function adminLoginView(message = "") {
   return `
@@ -3990,35 +3810,7 @@ function adminPanelView() {
       <div class="card" style="margin-top:32px">
         ${adminRetros.length ? adminRetros.map(adminRetroRow).join("") : `<p style="opacity:.65;margin:0">No hay retrospectivas registradas.</p>`}
       </div>
-
-      <div class="card" id="adminToolFeedbackSection" style="margin-top:24px">
-        <div class="admin-feedback-toolbar" id="adminToolFeedbackToolbar">
-          <div>
-            <h2 style="font-size:1.75rem;margin:0">Feedback de la APP</h2>
-            
-          </div>
-          ${adminToolFeedback.length ? `<button id="adminDeleteAllFeedbackBtn" class="admin-delete-all-feedback-btn" aria-label="Eliminar todo el feedback" title="Eliminar todo el feedback">🗑️ Borrar todas</button>` : ""}
-        </div>
-        <div class="admin-feedback-list" id="adminToolFeedbackList">
-          ${adminToolFeedback.length ? adminToolFeedback.map(adminToolFeedbackRow).join("") : `<p style="opacity:.65;margin:1rem 0 0">Todavía no hay sugerencias recibidas.</p>`}
-        </div>
-      </div>
     </section>
-  `;
-}
-
-function adminToolFeedbackRow(item) {
-  const id = escapeHtml(item.id);
-  const text = escapeHtml(item.feedback || "");
-  const date = item.created_at ? new Date(item.created_at).toLocaleString("es-AR") : "";
-  return `
-    <div class="admin-feedback-row">
-      <div class="admin-feedback-content">
-        <div>${text}</div>
-        ${date ? `<div class="admin-feedback-date">${escapeHtml(date)}</div>` : ""}
-      </div>
-      <button type="button" class="admin-delete-feedback-btn" data-feedback-id="${id}" aria-label="Eliminar feedback" title="Eliminar feedback">🗑️</button>
-    </div>
   `;
 }
 
@@ -4051,149 +3843,9 @@ async function loadAdminRetros() {
   adminRetros = data || [];
 }
 
-async function loadAdminToolFeedback() {
-  const { data, error } = await supabaseClient.rpc("get_admin_tool_feedback");
-  if (error) throw error;
-  adminToolFeedback = data || [];
-}
-
-async function loadAdminRetroToolFeedback() {
-  const { data, error } = await supabaseClient.rpc("get_admin_retro_tool_feedback");
-  if (error) throw error;
-  adminRetroToolFeedback = data || [];
-}
-
-let adminToolFeedbackRefreshTimer = null;
-let adminToolFeedbackRefreshing = false;
-let adminRetroToolFeedback = [];
-
-function adminToolFeedbackSignature(items = adminToolFeedback, retroItems = adminRetroToolFeedback) {
-  return JSON.stringify({
-    footer: (items || []).map(item => ({
-      id: item.id,
-      feedback: item.feedback,
-      created_at: item.created_at
-    })),
-    retros: (retroItems || []).map(item => ({
-      id: item.id,
-      retro_id: item.retro_id,
-      feedback: item.feedback,
-      retro_titulo: item.retro_titulo,
-      fecha: item.fecha
-    }))
-  });
-}
-
-function renderAdminToolFeedbackSection() {
-  const section = document.querySelector("#adminToolFeedbackSection");
-  if (!section) return;
-
-  const footerItems = adminToolFeedback || [];
-  const retroItems = adminRetroToolFeedback || [];
-  const hasAny = footerItems.length || retroItems.length;
-
-  section.innerHTML = `
-    <div class="admin-feedback-toolbar" id="adminToolFeedbackToolbar">
-      <div>
-        <h2 style="font-size:1.75rem;margin:0">Feedback de la APP</h2>
-      </div>
-      ${hasAny ? `<button id="adminDeleteAllFeedbackBtn" class="admin-delete-all-feedback-btn" aria-label="Eliminar todo el feedback" title="Eliminar todo el feedback">🗑️ Borrar todas</button>` : ""}
-    </div>
-
-    <div style="margin-top:28px">
-      <div class="badge">SUGERENCIAS DESDE EL FOOTER</div>
-      ${footerItems.length ? `
-        <div class="admin-feedback-list" id="adminToolFeedbackList">
-          ${footerItems.map(adminToolFeedbackRow).join("")}
-        </div>
-      ` : `<p style="opacity:.65;margin:1rem 0 0">Todavía no hay sugerencias recibidas desde el footer.</p>`}
-    </div>
-
-    <div style="margin-top:32px">
-      <div class="badge">SUGERENCIAS DESDE RETROS</div>
-      ${retroItems.length ? `
-        <div class="admin-feedback-list">
-          ${retroItems.map(adminRetroToolFeedbackRow).join("")}
-        </div>
-      ` : `<p style="opacity:.65;margin:1rem 0 0">Todavía no hay feedback sobre la herramienta desde retrospectivas.</p>`}
-    </div>
-  `;
-}
-
-function adminRetroToolFeedbackRow(item) {
-  const id = escapeHtml(item.id);
-  const text = escapeHtml(item.feedback || "");
-  const title = escapeHtml(item.retro_titulo || item.equipos || "Retrospectiva");
-  const date = item.fecha ? formatLandingDate(item.fecha) : "";
-  return `
-    <div class="admin-feedback-row">
-      <div class="admin-feedback-content">
-        <div style="font-weight:700">${title}</div>
-        ${date ? `<div class="admin-feedback-date">${escapeHtml(date)}</div>` : ""}
-        <div style="margin-top:.5rem">${text}</div>
-      </div>
-      <button type="button" class="admin-delete-retro-feedback-btn" data-retro-feedback-id="${id}" aria-label="Eliminar feedback" title="Eliminar feedback">🗑️</button>
-    </div>
-  `;
-}
-
-async function refreshAdminToolFeedback() {
-  if (adminToolFeedbackRefreshing || !document.querySelector("#adminToolFeedbackSection")) return;
-  adminToolFeedbackRefreshing = true;
-  try {
-    const previousSignature = adminToolFeedbackSignature();
-
-    // Cargamos ambas fuentes antes de reemplazar el estado visual.
-    // Si una consulta falla o devuelve una respuesta vacía inesperada,
-    // no pisamos el feedback de retros que ya estaba visible.
-    const { data: footerData, error: footerError } = await supabaseClient.rpc("get_admin_tool_feedback");
-    if (footerError) throw footerError;
-
-    const { data: retroData, error: retroError } = await supabaseClient.rpc("get_admin_retro_tool_feedback");
-    if (retroError) throw retroError;
-
-    const nextFooter = footerData || [];
-    const nextRetro = retroData || [];
-
-    // Una respuesta vacía del RPC de retros no debe hacer desaparecer
-    // datos que ya estaban cargados en Admin. Se conserva el estado anterior
-    // y se registra el caso para poder detectar el problema del backend.
-    if (adminRetroToolFeedback.length > 0 && nextRetro.length === 0) {
-      console.warn("El RPC get_admin_retro_tool_feedback devolvió 0 registros mientras Admin ya tenía feedback de retros. Se conserva el estado visible.");
-    } else {
-      adminRetroToolFeedback = nextRetro;
-    }
-
-    adminToolFeedback = nextFooter;
-
-    const nextSignature = adminToolFeedbackSignature();
-    if (previousSignature !== nextSignature) {
-      renderAdminToolFeedbackSection();
-      bindAdminToolFeedbackActions();
-    }
-  } catch (error) {
-    console.error("No se pudo actualizar el feedback de la APP:", error);
-  } finally {
-    adminToolFeedbackRefreshing = false;
-  }
-}
-
-function startAdminToolFeedbackAutoRefresh() {
-  if (adminToolFeedbackRefreshTimer) clearInterval(adminToolFeedbackRefreshTimer);
-  adminToolFeedbackRefreshTimer = setInterval(refreshAdminToolFeedback, 5000);
-}
-
-function stopAdminToolFeedbackAutoRefresh() {
-  if (adminToolFeedbackRefreshTimer) {
-    clearInterval(adminToolFeedbackRefreshTimer);
-    adminToolFeedbackRefreshTimer = null;
-  }
-}
-
 async function renderAdmin() {
   const { data: { session } } = await supabaseClient.auth.getSession();
   if (!session) {
-    stopAdminToolFeedbackAutoRefresh();
     landingShell(adminLoginView());
     bindAdminLogin();
     return;
@@ -4201,10 +3853,7 @@ async function renderAdmin() {
 
   try {
     await loadAdminRetros();
-    await loadAdminToolFeedback();
-    await loadAdminRetroToolFeedback();
   } catch (error) {
-    stopAdminToolFeedbackAutoRefresh();
     landingShell(adminLoginView("La cuenta autenticada no tiene permisos de administrador."));
     await supabaseClient.auth.signOut();
     bindAdminLogin();
@@ -4212,12 +3861,7 @@ async function renderAdmin() {
   }
 
   landingShell(adminPanelView());
-  // La vista inicial debe renderizar las dos fuentes de feedback, igual que el auto-refresh.
-  // adminPanelView() deja el contenedor montado y esta función lo completa con
-  // el feedback del footer y el feedback proveniente de las retrospectivas.
-  renderAdminToolFeedbackSection();
   bindAdminPanel();
-  startAdminToolFeedbackAutoRefresh();
 }
 
 function bindAdminLogin() {
@@ -4239,51 +3883,23 @@ function bindAdminLogin() {
   };
 }
 
-function bindAdminToolFeedbackActions() {
-  document.querySelectorAll(".admin-delete-feedback-btn").forEach(btn => {
-    btn.onclick = async () => {
-      if (!confirm("¿Borrar esta sugerencia? Esta acción no se puede deshacer.")) return;
-      const { error } = await supabaseClient.rpc("delete_tool_feedback", {
-        p_feedback_id: btn.dataset.feedbackId
-      });
-      if (error) {
-        return alert("No se pudo borrar la sugerencia.\n\n" + error.message);
-      }
-      await renderAdmin();
-    };
-  });
-
-  document.querySelectorAll(".admin-delete-retro-feedback-btn").forEach(btn => {
-    btn.onclick = async () => {
-      if (!confirm("¿Borrar esta sugerencia? Esta acción no se puede deshacer.")) return;
-      const { error } = await supabaseClient.rpc("delete_retro_tool_feedback", {
-        p_feedback_id: btn.dataset.retroFeedbackId
-      });
-      if (error) {
-        return alert("No se pudo borrar la sugerencia.\n\n" + error.message);
-      }
-      await renderAdmin();
-    };
-  });
-
-  const deleteAllFeedbackBtn = document.querySelector("#adminDeleteAllFeedbackBtn");
-  if (deleteAllFeedbackBtn) {
-    deleteAllFeedbackBtn.onclick = async () => {
-      if (!confirm("Vas a borrar todo el feedback de la APP. Esta acción no se puede deshacer.\n\n¿Querés continuar?")) return;
-      deleteAllFeedbackBtn.disabled = true;
-      deleteAllFeedbackBtn.textContent = "Borrando…";
-      const { error } = await supabaseClient.rpc("delete_all_tool_feedback");
-      if (error) {
-        deleteAllFeedbackBtn.disabled = false;
-        deleteAllFeedbackBtn.textContent = "🗑️ Borrar todas";
-        return alert("No se pudo borrar el feedback.\n\n" + error.message);
-      }
-      await renderAdmin();
+function bindAdminPanel() {
+  const historyNavBtn = document.querySelector("#landingHistoryNavBtn");
+  if (historyNavBtn) {
+    historyNavBtn.onclick = () => {
+      const historySection = document.querySelector("#landingHistorySection");
+      if (historySection) historySection.scrollIntoView({ behavior: "smooth", block: "start" });
     };
   }
-}
 
-function bindAdminPanel() {
+  const newRetroNavBtn = document.querySelector("#landingNewRetroNavBtn");
+  if (newRetroNavBtn) {
+    newRetroNavBtn.onclick = () => {
+      landingView = "create";
+      renderLanding();
+    };
+  }
+
   const logout = document.querySelector("#adminLogoutBtn");
   if (logout) logout.onclick = async () => {
     await supabaseClient.auth.signOut();
@@ -4330,12 +3946,6 @@ function bindAdminPanel() {
       await renderAdmin();
     };
   });
-
-  // feedback actions are bound from the helper above
-
-
-
-  bindAdminToolFeedbackActions();
 }
 
 async function initializeAdmin() {
@@ -6824,8 +6434,6 @@ document
 // =====================================================
 
 async function initialize() {
-
-  bindToolFeedback();
 
   const isAdminRoute = urlParams.get("admin") === "1";
 

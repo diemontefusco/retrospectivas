@@ -3984,7 +3984,7 @@ function adminPanelView() {
         <div class="admin-feedback-toolbar" id="adminToolFeedbackToolbar">
           <div>
             <h2 style="font-size:1.75rem;margin:0">Feedback de la APP</h2>
-            <p style="margin:.5rem 0 0;color:var(--muted)">Sugerencias recibidas desde el footer de la herramienta.</p>
+            
           </div>
           ${adminToolFeedback.length ? `<button id="adminDeleteAllFeedbackBtn" class="admin-delete-all-feedback-btn" aria-label="Eliminar todo el feedback" title="Eliminar todo el feedback">🗑️ Borrar todas</button>` : ""}
         </div>
@@ -4077,33 +4077,32 @@ function renderAdminToolFeedbackSection() {
   const section = document.querySelector("#adminToolFeedbackSection");
   if (!section) return;
 
+  const footerItems = adminToolFeedback || [];
+  const retroItems = adminRetroToolFeedback || [];
+  const hasAny = footerItems.length || retroItems.length;
+
   section.innerHTML = `
     <div class="admin-feedback-toolbar" id="adminToolFeedbackToolbar">
       <div>
         <h2 style="font-size:1.75rem;margin:0">Feedback de la APP</h2>
-        <p style="margin:.5rem 0 0;color:var(--muted)">Todo el feedback relacionado con la herramienta se concentra en esta sección.</p>
       </div>
+      ${hasAny ? `<button id="adminDeleteAllFeedbackBtn" class="admin-delete-all-feedback-btn" aria-label="Eliminar todo el feedback" title="Eliminar todo el feedback">🗑️ Borrar todas</button>` : ""}
     </div>
 
     <div style="margin-top:28px">
       <div class="badge">SUGERENCIAS DESDE EL FOOTER</div>
-      <p style="margin:.5rem 0 0;color:var(--muted)">Feedback enviado desde “Sumá tu feedback!”.</p>
-      ${adminToolFeedback.length ? `
+      ${footerItems.length ? `
         <div class="admin-feedback-list" id="adminToolFeedbackList">
-          ${adminToolFeedback.map(adminToolFeedbackRow).join("")}
-        </div>
-        <div style="display:flex;justify-content:flex-end;margin-top:16px">
-          <button id="adminDeleteAllFeedbackBtn" class="admin-delete-all-feedback-btn" aria-label="Eliminar todas las sugerencias del footer" title="Eliminar todas las sugerencias del footer">🗑️ Borrar todas</button>
+          ${footerItems.map(adminToolFeedbackRow).join("")}
         </div>
       ` : `<p style="opacity:.65;margin:1rem 0 0">Todavía no hay sugerencias recibidas desde el footer.</p>`}
     </div>
 
     <div style="margin-top:32px;padding-top:28px;border-top:1px solid rgba(255,255,255,.08)">
       <div class="badge">FEEDBACK SOBRE LA HERRAMIENTA EN LAS RETROS</div>
-      <p style="margin:.5rem 0 0;color:var(--muted)">Observaciones sobre la herramienta enviadas al finalizar cada retrospectiva.</p>
-      ${adminRetroToolFeedback.length ? `
+      ${retroItems.length ? `
         <div class="admin-feedback-list">
-          ${adminRetroToolFeedback.map(adminRetroToolFeedbackRow).join("")}
+          ${retroItems.map(adminRetroToolFeedbackRow).join("")}
         </div>
       ` : `<p style="opacity:.65;margin:1rem 0 0">Todavía no hay feedback sobre la herramienta desde retrospectivas.</p>`}
     </div>
@@ -4111,6 +4110,7 @@ function renderAdminToolFeedbackSection() {
 }
 
 function adminRetroToolFeedbackRow(item) {
+  const id = escapeHtml(item.id);
   const text = escapeHtml(item.feedback || "");
   const title = escapeHtml(item.retro_titulo || item.equipos || "Retrospectiva");
   const date = item.fecha ? formatLandingDate(item.fecha) : "";
@@ -4121,6 +4121,7 @@ function adminRetroToolFeedbackRow(item) {
         ${date ? `<div class="admin-feedback-date">${escapeHtml(date)}</div>` : ""}
         <div style="margin-top:.5rem">${text}</div>
       </div>
+      <button type="button" class="admin-delete-retro-feedback-btn" data-retro-feedback-id="${id}" aria-label="Eliminar feedback" title="Eliminar feedback">🗑️</button>
     </div>
   `;
 }
@@ -4215,10 +4216,23 @@ function bindAdminToolFeedbackActions() {
     };
   });
 
+  document.querySelectorAll(".admin-delete-retro-feedback-btn").forEach(btn => {
+    btn.onclick = async () => {
+      if (!confirm("¿Borrar esta sugerencia? Esta acción no se puede deshacer.")) return;
+      const { error } = await supabaseClient.rpc("delete_retro_tool_feedback", {
+        p_feedback_id: btn.dataset.retroFeedbackId
+      });
+      if (error) {
+        return alert("No se pudo borrar la sugerencia.\n\n" + error.message);
+      }
+      await renderAdmin();
+    };
+  });
+
   const deleteAllFeedbackBtn = document.querySelector("#adminDeleteAllFeedbackBtn");
   if (deleteAllFeedbackBtn) {
     deleteAllFeedbackBtn.onclick = async () => {
-      if (!confirm("Vas a borrar todas las sugerencias de la APP. Esta acción no se puede deshacer.\n\n¿Querés continuar?")) return;
+      if (!confirm("Vas a borrar todo el feedback de la APP. Esta acción no se puede deshacer.\n\n¿Querés continuar?")) return;
       deleteAllFeedbackBtn.disabled = true;
       deleteAllFeedbackBtn.textContent = "Borrando…";
       const { error } = await supabaseClient.rpc("delete_all_tool_feedback");

@@ -148,6 +148,46 @@ textarea { min-height:6.25rem; resize:vertical; }
 }
 
 
+
+
+/* Feedback de una retrospectiva: contenido más cerca del header. */
+.landing-feedback-view {
+  max-width: 61.25rem;
+  margin: 0 auto;
+  padding: 1.25rem 1.25rem 5rem;
+}
+
+.landing-feedback-view > .eyebrow {
+  margin-top: 0;
+}
+
+/* Identidad de la retrospectiva en la sesión */
+.retro-title-divider { color:var(--muted); margin:0 .35rem; }
+.retro-title-text {
+  color:var(--text);
+  font-size:.875rem;
+  font-weight:600;
+  letter-spacing:0;
+  max-width:min(34rem,42vw);
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  vertical-align:middle;
+}
+
+/* Formulario de nueva retrospectiva */
+.landing-form-label {
+  display:block;
+  margin-top:1.5rem;
+  margin-bottom:.625rem;
+  color:#b8bdc7;
+  font-size:.8125rem;
+  letter-spacing:.04em;
+  text-transform:uppercase;
+}
+.landing-form-label:first-child { margin-top:0; }
+.required-marker { color:#21dbaa; font-weight:700; }
+
 /* Feedback de la herramienta */
 .footer-center {
   display:flex;
@@ -257,7 +297,7 @@ textarea { min-height:6.25rem; resize:vertical; }
 }
 .admin-feedback-content { flex:1; min-width:0; }
 .admin-feedback-date { color:var(--muted); font-size:.75rem; margin-top:.4rem; }
-.admin-delete-feedback-btn, .admin-delete-retro-feedback-btn, .admin-delete-all-feedback-btn {
+.admin-delete-feedback-btn, .admin-delete-all-feedback-btn {
   border:0.0625rem solid rgba(255,120,120,.35);
   background:transparent;
   color:#ff9b9b;
@@ -269,22 +309,23 @@ textarea { min-height:6.25rem; resize:vertical; }
   justify-content:center;
   flex:0 0 auto;
 }
-.admin-delete-feedback-btn, .admin-delete-retro-feedback-btn {
+.admin-delete-feedback-btn {
   width:2.5rem;
   height:2.5rem;
   padding:0;
   font-size:1rem;
 }
-.admin-delete-feedback-btn:hover, .admin-delete-retro-feedback-btn:hover, .admin-delete-all-feedback-btn:hover {
+.admin-delete-feedback-btn:hover, .admin-delete-all-feedback-btn:hover {
   background:rgba(255,120,120,.08);
 }
 .admin-delete-all-feedback-btn { padding:.625rem .875rem; }
 @media(max-width:47.5rem) {
+  .retro-title-text { max-width:42vw; font-size:.75rem; }
   .footer-center { justify-content:center; }
   .tool-feedback-cta { padding:.5625rem .75rem; font-size:.75rem; }
   .tool-feedback-dialog { padding:1.25rem; }
   .tool-feedback-actions { flex-direction:column-reverse; }
   .tool-feedback-actions button { width:100%; }
   .admin-feedback-row { flex-direction:column; }
-  .admin-delete-feedback-btn, .admin-delete-retro-feedback-btn { width:2.5rem; }
+  .admin-delete-feedback-btn { width:2.5rem; }
 }

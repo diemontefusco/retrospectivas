@@ -3459,6 +3459,7 @@ const screens = [
 let landingRetros = [];
 let landingView = "home";
 let landingSelectedRetro = null;
+let landingReturnContext = "home";
 
 function todayLocalISO() {
   const d = new Date();
@@ -3699,6 +3700,7 @@ function bindLanding() {
   const newRetroNavBtn = document.querySelector("#landingNewRetroNavBtn");
   if (newRetroNavBtn) {
     newRetroNavBtn.onclick = () => {
+      landingReturnContext = "home";
       landingView = "create";
       renderLanding();
     };
@@ -3716,7 +3718,17 @@ function bindLanding() {
   if (exploreSummaryBtn) exploreSummaryBtn.onclick = scrollToLandingHistory;
 
   const back = document.querySelector("#landingBackBtn");
-  if (back) back.onclick = async () => { landingView = "home"; await loadLandingRetros(); renderLanding(); };
+  if (back) back.onclick = async () => {
+    if (landingReturnContext === "admin") {
+      landingView = "home";
+      landingReturnContext = "home";
+      await renderAdmin();
+      return;
+    }
+    landingView = "home";
+    await loadLandingRetros();
+    renderLanding();
+  };
 
   document.querySelectorAll(".landing-summary-btn").forEach(btn => {
     btn.onclick = async () => {
@@ -3895,6 +3907,7 @@ function bindAdminPanel() {
   const newRetroNavBtn = document.querySelector("#landingNewRetroNavBtn");
   if (newRetroNavBtn) {
     newRetroNavBtn.onclick = () => {
+      landingReturnContext = "admin";
       landingView = "create";
       renderLanding();
     };

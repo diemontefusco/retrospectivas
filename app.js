@@ -3691,11 +3691,9 @@ async function renderLanding() {
 function bindLanding() {
   const historyNavBtn = document.querySelector("#landingHistoryNavBtn");
   if (historyNavBtn) {
-    historyNavBtn.onclick = async () => {
-      landingReturnContext = "admin";
-      landingView = "home";
-      await loadLandingRetros();
-      renderLanding();
+    historyNavBtn.onclick = () => {
+      const historySection = document.querySelector("#landingHistorySection");
+      if (historySection) historySection.scrollIntoView({ behavior: "smooth", block: "start" });
     };
   }
 
@@ -3900,9 +3898,11 @@ function bindAdminLogin() {
 function bindAdminPanel() {
   const historyNavBtn = document.querySelector("#landingHistoryNavBtn");
   if (historyNavBtn) {
-    historyNavBtn.onclick = () => {
-      const historySection = document.querySelector("#landingHistorySection");
-      if (historySection) historySection.scrollIntoView({ behavior: "smooth", block: "start" });
+    historyNavBtn.onclick = async () => {
+      landingReturnContext = "admin";
+      landingView = "home";
+      await loadLandingRetros();
+      renderLanding();
     };
   }
 

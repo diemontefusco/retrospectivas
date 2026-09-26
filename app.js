@@ -3485,7 +3485,7 @@ function landingShell(content) {
 
   if (topbar) {
     topbar.innerHTML = `
-      <div class="brand"><span class="brand-dot"></span> RETROS</div>
+      <div class="brand"><img class="brand-logo" src="./logo.svg" alt=""> RETROS</div>
       ${landingView === "home" ? `
         <nav class="landing-nav">
           <button id="landingHistoryNavBtn" class="ghost landing-nav-btn">Ver retros</button>

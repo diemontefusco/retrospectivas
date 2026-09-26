@@ -4201,6 +4201,10 @@ async function renderAdmin() {
   }
 
   landingShell(adminPanelView());
+  // La vista inicial debe renderizar las dos fuentes de feedback, igual que el auto-refresh.
+  // adminPanelView() deja el contenedor montado y esta función lo completa con
+  // el feedback del footer y el feedback proveniente de las retrospectivas.
+  renderAdminToolFeedbackSection();
   bindAdminPanel();
   startAdminToolFeedbackAutoRefresh();
 }

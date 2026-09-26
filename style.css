@@ -329,19 +329,41 @@ textarea { min-height:6.25rem; resize:vertical; }
   .admin-delete-feedback-btn { width:2.5rem; }
 }
 
-/* Look & feel global de botones */
-button {
-  border: 0.0625rem solid #21dbaa;
-  color: #21dbaa;
-  background: rgba(0, 0, 0, 0);
+
+/* Look & feel global de botones — aplicación completa */
+button,
+button.primary,
+button.ghost,
+button.landing-nav-btn,
+button.landing-nav-btn.primary,
+button.landing-action-card,
+button.landing-history-actions button,
+button.tool-feedback-cta,
+button.tool-feedback-actions button,
+button.admin-delete-feedback-btn,
+button.admin-delete-all-feedback-btn {
+  border: 0.0625rem solid #21dbaa !important;
+  color: #21dbaa !important;
+  background: rgba(0, 0, 0, 0) !important;
   transition: background-color .18s ease, border-color .18s ease, color .18s ease, transform .18s ease;
 }
 
-button:hover:not(:disabled):not(.landing-disabled-action) {
-  background: rgba(33,219,170,.1);
+button:hover:not(:disabled):not(.landing-disabled-action),
+button.primary:hover:not(:disabled),
+button.ghost:hover:not(:disabled),
+button.landing-nav-btn:hover:not(:disabled),
+button.landing-action-card:hover:not(:disabled),
+button.landing-history-actions button:hover:not(:disabled),
+button.tool-feedback-cta:hover:not(:disabled),
+button.tool-feedback-actions button:hover:not(:disabled),
+button.admin-delete-feedback-btn:hover:not(:disabled),
+button.admin-delete-all-feedback-btn:hover:not(:disabled) {
+  background: rgba(33,219,170,.1) !important;
+  border-color: #21dbaa !important;
+  color: #21dbaa !important;
 }
 
-button:disabled,
-button.landing-disabled-action {
-  cursor: not-allowed;
+button.landing-disabled-action,
+button:disabled {
+  /* Los estados disabled conservan su tratamiento visual propio. */
 }

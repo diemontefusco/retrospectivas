@@ -3640,6 +3640,11 @@ function landingShell(content) {
           <button id="landingHistoryNavBtn" class="ghost landing-nav-btn">Ver retros</button>
           <button id="landingNewRetroNavBtn" class="primary landing-nav-btn">Nueva retro +</button>
         </nav>
+      ` : landingView === "feedback" ? `
+        <nav class="landing-nav">
+          <button id="landingFeedbackBackNavBtn" class="ghost landing-nav-btn">← Volver</button>
+          <button id="landingNewRetroNavBtn" class="primary landing-nav-btn">Nueva retro +</button>
+        </nav>
       ` : ""}
     `;
   }
@@ -3808,9 +3813,8 @@ function landingFeedbackView(data) {
   const rows = data?.feedback || [];
   const avg = data?.average_rating;
   return `
-    <section style="max-width:980px;margin:0 auto;padding:48px 20px 80px">
-      <button id="landingBackBtn" style="padding:9px 13px">← Volver al historial</button>
-      <div class="eyebrow" style="margin-top:30px">Feedback de la retrospectiva</div>
+    <section class="landing-feedback-view">
+      <div class="eyebrow">Feedback de la retrospectiva</div>
       <h2 style="margin-top:10px">${escapeHtml(data?.retro?.equipos || data?.retro?.nombre || "Retrospectiva")}</h2>
       <div class="grid" style="margin-top:24px">
         <div class="card"><div class="eyebrow">Respuestas</div><div class="big-number">${rows.length}</div></div>
@@ -3873,6 +3877,13 @@ function bindLanding() {
 
   const back = document.querySelector("#landingBackBtn");
   if (back) back.onclick = async () => { landingView = "home"; await loadLandingRetros(); renderLanding(); };
+
+  const feedbackBackNavBtn = document.querySelector("#landingFeedbackBackNavBtn");
+  if (feedbackBackNavBtn) feedbackBackNavBtn.onclick = async () => {
+    landingView = "home";
+    await loadLandingRetros();
+    renderLanding();
+  };
 
   document.querySelectorAll(".landing-summary-btn").forEach(btn => {
     btn.onclick = async () => {

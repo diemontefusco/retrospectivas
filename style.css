@@ -10,7 +10,7 @@ body { margin:0; background:var(--bg); color:var(--text); font-family:Inter,syst
 button,input,textarea { font:inherit; }
 .app { min-height:100vh; display:flex; flex-direction:column; }
 .topbar { background:var(--bg); position:sticky; top:0; z-index:1000; height:4.5rem; display:flex; align-items:center; gap:1.75rem; padding:0 5vw; border-bottom:0.0625rem solid var(--line); }
-.brand { display:flex; align-items:center; gap:.75rem; font-size:1.3rem; font-weight:800; letter-spacing:.12em; }
+.brand { display:flex; align-items:center; gap: .10rem; font-size:1.3rem; font-weight:800; letter-spacing:.12em; }
 .brand-logo { display:block; width:2.5rem; height:2.5rem; flex:0 0 auto; }
 .brand > span { display:block; line-height:1; }
 .session { color:var(--muted); font-size:0.75rem; letter-spacing:.1em; }

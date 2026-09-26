@@ -328,3 +328,20 @@ textarea { min-height:6.25rem; resize:vertical; }
   .admin-feedback-row { flex-direction:column; }
   .admin-delete-feedback-btn { width:2.5rem; }
 }
+
+/* Look & feel global de botones */
+button {
+  border: 0.0625rem solid #21dbaa;
+  color: #21dbaa;
+  background: rgba(0, 0, 0, 0);
+  transition: background-color .18s ease, border-color .18s ease, color .18s ease, transform .18s ease;
+}
+
+button:hover:not(:disabled):not(.landing-disabled-action) {
+  background: rgba(33,219,170,.1);
+}
+
+button:disabled,
+button.landing-disabled-action {
+  cursor: not-allowed;
+}

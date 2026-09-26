@@ -154,7 +154,6 @@ textarea { min-height:6.25rem; resize:vertical; }
 .landing-feedback-view {
   max-width: 61.25rem;
   margin: 0 auto;
-  padding: 1.25rem 1.25rem 5rem;
 }
 
 .landing-feedback-view > .eyebrow {

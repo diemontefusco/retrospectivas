@@ -150,28 +150,33 @@ export function mountDateField(input, options = {}) {
       renderCalendar();
     };
     popover.querySelectorAll("[data-date-value]").forEach(dayButton => {
-      dayButton.onclick = () => {
+      dayButton.onclick = (event) => {
+        event.preventDefault();
+        event.stopPropagation();
         selectedValue = dayButton.dataset.dateValue;
         const chosen = parseISO(selectedValue);
         if (chosen) visibleMonth = new Date(chosen.getFullYear(), chosen.getMonth(), 1, 12);
-        updateValue(true);
+        updateValue(false);
         close();
-        trigger.focus();
+        input.dispatchEvent(new Event("change", { bubbles: true }));
+        if (!isMobile()) trigger.focus();
       };
     });
     popover.querySelector("[data-date-clear]").onclick = () => {
       selectedValue = "";
-      updateValue(true);
+      updateValue(false);
       close();
-      trigger.focus();
+      input.dispatchEvent(new Event("change", { bubbles: true }));
+      if (!isMobile()) trigger.focus();
     };
     popover.querySelector("[data-date-today]").onclick = () => {
       selectedValue = todayLocalISO();
       const chosen = parseISO(selectedValue);
       visibleMonth = new Date(chosen.getFullYear(), chosen.getMonth(), 1, 12);
-      updateValue(true);
+      updateValue(false);
       close();
-      trigger.focus();
+      input.dispatchEvent(new Event("change", { bubbles: true }));
+      if (!isMobile()) trigger.focus();
     };
   }
 
@@ -190,6 +195,7 @@ export function mountDateField(input, options = {}) {
   function restoreToWrapper() {
     if (mobileLayer.parentElement !== wrapper) wrapper.appendChild(mobileLayer);
     mobileLayer.hidden = true;
+    mobileLayer.style.display = "none";
     mobileLayer.setAttribute("aria-hidden", "true");
   }
 
@@ -203,6 +209,7 @@ export function mountDateField(input, options = {}) {
     popover.hidden = false;
     if (mobile) {
       mobileLayer.hidden = false;
+      mobileLayer.style.display = "block";
       mobileLayer.setAttribute("aria-hidden", "false");
     }
     renderCalendar();
@@ -216,6 +223,8 @@ export function mountDateField(input, options = {}) {
     trigger.setAttribute("aria-expanded", "false");
     backdrop.hidden = true;
     popover.hidden = true;
+    mobileLayer.hidden = true;
+    mobileLayer.style.display = "none";
     restoreToWrapper();
     document.removeEventListener("keydown", onKeydown);
   }

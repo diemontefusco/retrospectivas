@@ -186,37 +186,18 @@
     position: relative;
   }
 
-  /* Mobile uses the same custom calendar inline, without a fullscreen overlay. */
-  .ds-date-field__input {
-    position: absolute !important;
-    width: .0625rem !important;
-    height: .0625rem !important;
-    margin: -.0625rem !important;
-    padding: 0 !important;
-    overflow: hidden !important;
-    clip: rect(0, 0, 0, 0) !important;
-    white-space: nowrap !important;
-    border: 0 !important;
-  }
-
-  .ds-date-field__trigger {
-    display: flex;
-  }
-
-  .ds-date-field__popover {
-    position: relative;
-    top: auto;
-    left: auto;
-    z-index: auto;
-    width: 100%;
-    margin-top: .5rem;
-    padding: var(--ds-space-4);
+  .ds-date-field__popover.is-mobile-date-popover {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 2147483000;
+    width: min(21rem, calc(100vw - 1.5rem));
+    max-height: calc(100dvh - 1.5rem);
+    overflow: auto;
+    margin: 0;
     box-sizing: border-box;
-    box-shadow: none;
-  }
-
-  .ds-date-field__popover[hidden] {
-    display: none !important;
+    box-shadow: 0 1rem 3rem rgba(0,0,0,.34);
+    -webkit-overflow-scrolling: touch;
   }
 }
 

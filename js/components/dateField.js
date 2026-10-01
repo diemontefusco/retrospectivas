@@ -1,4 +1,4 @@
-// DateField mobile fix7
+// DateField mobile fix9
 import { escapeHtml, todayLocalISO } from "../utils/formatters.js";
 
 const WEEKDAYS = ["lu", "ma", "mi", "ju", "vi", "sá", "do"];
@@ -187,20 +187,60 @@ export function mountDateField(input, options = {}) {
     if (!isMobile()) trigger.focus();
   }
 
+  function positionMobilePopover() {
+    if (!open || !isMobile() || popover.parentElement !== document.body) return;
+
+    const rect = trigger.getBoundingClientRect();
+    const viewportWidth = document.documentElement.clientWidth;
+    const viewportHeight = window.innerHeight;
+    const margin = 12;
+    const gap = 8;
+    const popoverWidth = Math.min(336, viewportWidth - margin * 2);
+
+    popover.style.width = `${popoverWidth}px`;
+    popover.style.left = `${Math.max(margin, Math.min(rect.left, viewportWidth - popoverWidth - margin))}px`;
+
+    const popoverHeight = popover.getBoundingClientRect().height;
+    const belowTop = rect.bottom + gap;
+    const aboveTop = rect.top - popoverHeight - gap;
+    const top = belowTop + popoverHeight <= viewportHeight - margin
+      ? belowTop
+      : Math.max(margin, aboveTop);
+
+    popover.style.top = `${Math.max(margin, Math.min(top, viewportHeight - popoverHeight - margin))}px`;
+  }
+
   function openCalendar() {
     if (open || input.disabled) return;
 
-    // Mobile uses the same custom calendar, rendered inline inside the field.
-    // This avoids fullscreen overlays and browser-specific native picker behavior.
     open = true;
     wrapper.classList.add("is-open");
     trigger.setAttribute("aria-expanded", "true");
 
     renderCalendar();
 
-    popover.classList.toggle("is-mobile-date-popover", isMobile());
-    wrapper.appendChild(popover);
+    const mobile = isMobile();
+    popover.classList.toggle("is-mobile-date-popover", mobile);
     popover.hidden = false;
+
+    if (mobile) {
+      // Portal the calendar to <body> so no parent overflow/stacking context
+      // can clip it on iOS Safari/WebKit or Chrome for iOS. No backdrop is used.
+      document.body.appendChild(popover);
+      popover.style.position = "fixed";
+      popover.style.zIndex = "2147483000";
+      popover.style.margin = "0";
+      requestAnimationFrame(positionMobilePopover);
+      window.addEventListener("resize", positionMobilePopover);
+      window.addEventListener("scroll", positionMobilePopover, true);
+    } else {
+      wrapper.appendChild(popover);
+      popover.style.position = "";
+      popover.style.zIndex = "";
+      popover.style.width = "";
+      popover.style.left = "";
+      popover.style.top = "";
+    }
 
     document.addEventListener("keydown", onKeydown);
   }
@@ -215,9 +255,14 @@ export function mountDateField(input, options = {}) {
 
     popover.hidden = true;
     popover.classList.remove("is-mobile-date-popover");
-    if (popover.parentElement === document.body) {
-      popover.remove();
-    }
+    window.removeEventListener("resize", positionMobilePopover);
+    window.removeEventListener("scroll", positionMobilePopover, true);
+    popover.style.position = "";
+    popover.style.zIndex = "";
+    popover.style.width = "";
+    popover.style.left = "";
+    popover.style.top = "";
+    popover.style.margin = "";
     wrapper.appendChild(popover);
   }
 

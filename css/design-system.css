@@ -182,7 +182,29 @@
 .ds-date-field__footer button { min-height:2.5rem; }
 
 @media (max-width: 47.5rem) {
+  .ds-date-field { position: relative; }
+  .ds-date-field__input {
+    position: absolute !important;
+    inset: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    clip: auto !important;
+    clip-path: none !important;
+    overflow: hidden !important;
+    opacity: 0 !important;
+    z-index: 2 !important;
+    cursor: pointer !important;
+  }
+  .ds-date-field__trigger {
+    position: relative;
+    z-index: 1;
+    pointer-events: none;
+  }
   .ds-date-field__popover {
+    display: none !important;
+  }
     position:fixed;
     left:0;
     right:0;

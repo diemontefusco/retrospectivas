@@ -189,8 +189,17 @@ export function mountDateField(input, options = {}) {
   function openCalendar() {
     if (open || input.disabled) return;
 
-    // Clean up any stale mobile date popovers from a previous render.
-    document.querySelectorAll(".ds-date-field__popover.is-mobile-date-popover").forEach(node => node.remove());
+    // On mobile, use the browser's native date picker. This avoids overlay/stacking
+    // issues on iOS/Android and keeps the field fully touch-native.
+    if (isMobile()) {
+      try {
+        if (typeof input.showPicker === "function") input.showPicker();
+        else input.click();
+      } catch {
+        input.click();
+      }
+      return;
+    }
 
     open = true;
     wrapper.classList.add("is-open");
@@ -198,15 +207,9 @@ export function mountDateField(input, options = {}) {
 
     renderCalendar();
 
-    if (isMobile()) {
-      popover.classList.add("is-mobile-date-popover");
-      popover.hidden = false;
-      document.body.appendChild(popover);
-    } else {
-      popover.classList.remove("is-mobile-date-popover");
-      wrapper.appendChild(popover);
-      popover.hidden = false;
-    }
+    popover.classList.remove("is-mobile-date-popover");
+    wrapper.appendChild(popover);
+    popover.hidden = false;
 
     document.addEventListener("keydown", onKeydown);
   }

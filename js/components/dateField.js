@@ -86,7 +86,13 @@ export function mountDateField(input, options = {}) {
   popover.setAttribute("role", "dialog");
   popover.setAttribute("aria-label", options.label || "Seleccionar fecha");
 
-  wrapper.append(trigger, backdrop, popover);
+  const mobileLayer = document.createElement("div");
+  mobileLayer.className = "ds-date-field__mobile-layer";
+  mobileLayer.hidden = true;
+  mobileLayer.setAttribute("aria-hidden", "true");
+  mobileLayer.append(backdrop, popover);
+
+  wrapper.append(trigger, mobileLayer);
 
   let visibleMonth = parseISO(initialValue) || parseISO(todayLocalISO()) || new Date();
   let selectedValue = initialValue;
@@ -174,13 +180,17 @@ export function mountDateField(input, options = {}) {
   }
 
   function portalToBodyIfMobile() {
-    if (!isMobile()) return;
-    document.body.append(backdrop, popover);
+    if (!isMobile()) return false;
+    document.body.appendChild(mobileLayer);
+    mobileLayer.hidden = false;
+    mobileLayer.setAttribute("aria-hidden", "false");
+    return true;
   }
 
   function restoreToWrapper() {
-    if (backdrop.parentElement !== wrapper) wrapper.appendChild(backdrop);
-    if (popover.parentElement !== wrapper) wrapper.appendChild(popover);
+    if (mobileLayer.parentElement !== wrapper) wrapper.appendChild(mobileLayer);
+    mobileLayer.hidden = true;
+    mobileLayer.setAttribute("aria-hidden", "true");
   }
 
   function openCalendar() {
@@ -188,9 +198,13 @@ export function mountDateField(input, options = {}) {
     open = true;
     wrapper.classList.add("is-open");
     trigger.setAttribute("aria-expanded", "true");
-    portalToBodyIfMobile();
+    const mobile = portalToBodyIfMobile();
     backdrop.hidden = false;
     popover.hidden = false;
+    if (mobile) {
+      mobileLayer.hidden = false;
+      mobileLayer.setAttribute("aria-hidden", "false");
+    }
     renderCalendar();
     document.addEventListener("keydown", onKeydown);
   }

@@ -92,12 +92,12 @@ export function mountDateField(input, options = {}) {
   let selectedValue = initialValue;
   let open = false;
 
-  function updateValue() {
+  function updateValue(emitChange = false) {
     const formatted = formatDisplay(selectedValue, placeholder);
     value.textContent = formatted.text;
     value.classList.toggle("is-placeholder", formatted.placeholder);
     input.value = selectedValue || "";
-    input.dispatchEvent(new Event("change", { bubbles: true }));
+    if (emitChange) input.dispatchEvent(new Event("change", { bubbles: true }));
   }
 
   function renderCalendar() {
@@ -148,14 +148,14 @@ export function mountDateField(input, options = {}) {
         selectedValue = dayButton.dataset.dateValue;
         const chosen = parseISO(selectedValue);
         if (chosen) visibleMonth = new Date(chosen.getFullYear(), chosen.getMonth(), 1, 12);
-        updateValue();
+        updateValue(true);
         close();
         trigger.focus();
       };
     });
     popover.querySelector("[data-date-clear]").onclick = () => {
       selectedValue = "";
-      updateValue();
+      updateValue(true);
       close();
       trigger.focus();
     };
@@ -163,7 +163,7 @@ export function mountDateField(input, options = {}) {
       selectedValue = todayLocalISO();
       const chosen = parseISO(selectedValue);
       visibleMonth = new Date(chosen.getFullYear(), chosen.getMonth(), 1, 12);
-      updateValue();
+      updateValue(true);
       close();
       trigger.focus();
     };
@@ -201,7 +201,7 @@ export function mountDateField(input, options = {}) {
   backdrop.addEventListener("click", close);
   input.addEventListener("change", () => {
     selectedValue = input.value || "";
-    updateValue();
+    updateValue(false);
   });
 
   if (input.disabled) wrapper.classList.add("is-disabled");
@@ -215,7 +215,7 @@ export function mountDateField(input, options = {}) {
       selectedValue = nextValue || "";
       const nextDate = parseISO(selectedValue);
       if (nextDate) visibleMonth = new Date(nextDate.getFullYear(), nextDate.getMonth(), 1, 12);
-      updateValue();
+      updateValue(true);
     },
     open: openCalendar,
     close,

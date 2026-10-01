@@ -1,4 +1,4 @@
-import { mountDateFields } from "../../components/dateField.js";
+import { mountDateFields } from "../../../components/dateField.js";
 
 export function bindActionsBindings(ctx) {
   mountDateFields(document);

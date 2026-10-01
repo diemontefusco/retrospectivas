@@ -243,10 +243,19 @@ export function mountDateField(input, options = {}) {
       return;
     }
 
-    // If DevTools leaves mobile emulation while the calendar is open, restore
-    // the desktop DOM/positioning instead of keeping the mobile fixed coordinates.
-    if (popover.parentElement === document.body || popover.classList.contains("is-mobile-date-popover")) {
+    // Desktop always keeps the popover inside the field wrapper. This is also
+    // important on the initial open: the popover is created detached, so it
+    // must be mounted before the browser can render it.
+    if (popover.parentElement !== wrapper || popover.classList.contains("is-mobile-date-popover")) {
       resetDesktopPopover();
+    } else {
+      popover.classList.remove("is-mobile-date-popover");
+      popover.style.position = "";
+      popover.style.zIndex = "";
+      popover.style.width = "";
+      popover.style.left = "";
+      popover.style.top = "";
+      popover.style.margin = "";
     }
   }
 

@@ -1755,6 +1755,7 @@ async function renderLanding() {
   else landingShell(landingHome(landingRetros));
 
   bindLanding();
+  mountDateFields(document);
 }
 
 function bindLanding() {
@@ -2577,6 +2578,7 @@ async function bind() {
   bindActivityBindings(bindingContext);
   bindQuestionsBindings(bindingContext);
   bindActionsBindings(bindingContext);
+  mountDateFields(document);
 }
 
 // =====================================================

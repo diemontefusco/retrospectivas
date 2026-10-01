@@ -169,11 +169,26 @@ export function mountDateField(input, options = {}) {
     };
   }
 
+  function isMobile() {
+    return window.matchMedia("(max-width: 47.5rem)").matches;
+  }
+
+  function portalToBodyIfMobile() {
+    if (!isMobile()) return;
+    document.body.append(backdrop, popover);
+  }
+
+  function restoreToWrapper() {
+    if (backdrop.parentElement !== wrapper) wrapper.appendChild(backdrop);
+    if (popover.parentElement !== wrapper) wrapper.appendChild(popover);
+  }
+
   function openCalendar() {
     if (open || input.disabled) return;
     open = true;
     wrapper.classList.add("is-open");
     trigger.setAttribute("aria-expanded", "true");
+    portalToBodyIfMobile();
     backdrop.hidden = false;
     popover.hidden = false;
     renderCalendar();
@@ -187,6 +202,7 @@ export function mountDateField(input, options = {}) {
     trigger.setAttribute("aria-expanded", "false");
     backdrop.hidden = true;
     popover.hidden = true;
+    restoreToWrapper();
     document.removeEventListener("keydown", onKeydown);
   }
 

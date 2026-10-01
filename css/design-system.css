@@ -182,58 +182,52 @@
 .ds-date-field__footer button { min-height:2.5rem; }
 
 @media (max-width: 47.5rem) {
-  .ds-date-field { position: relative; }
+  .ds-date-field {
+    position: relative;
+  }
+
+  /* On mobile the native date input is the actual interactive control.
+     This avoids custom overlays and lets iOS/Android open their native picker. */
   .ds-date-field__input {
-    position: absolute !important;
-    inset: 0 !important;
+    position: relative !important;
+    inset: auto !important;
+    display: block !important;
+    box-sizing: border-box !important;
     width: 100% !important;
-    height: 100% !important;
+    height: var(--ds-control-height) !important;
     margin: 0 !important;
-    padding: 0 !important;
+    padding: .75rem 2.75rem .75rem .875rem !important;
+    overflow: visible !important;
     clip: auto !important;
     clip-path: none !important;
-    overflow: hidden !important;
-    opacity: 0 !important;
+    white-space: normal !important;
+    border: .0625rem solid var(--ds-color-border) !important;
+    border-radius: var(--ds-radius-md) !important;
+    background: var(--ds-color-surface-1) !important;
+    color: var(--ds-color-text) !important;
+    font: inherit !important;
+    font-size: var(--ds-font-size-md) !important;
+    line-height: 1.35 !important;
+    opacity: 1 !important;
     z-index: 2 !important;
     cursor: pointer !important;
+    appearance: auto !important;
+    -webkit-appearance: auto !important;
   }
+
+  .ds-date-field__input:focus {
+    border-color: var(--ds-color-primary) !important;
+    box-shadow: var(--ds-focus-ring) !important;
+    outline: none !important;
+  }
+
   .ds-date-field__trigger {
-    position: relative;
-    z-index: 1;
-    pointer-events: none;
+    display: none;
   }
+
   .ds-date-field__popover {
     display: none !important;
   }
-    position:fixed;
-    left:0;
-    right:0;
-    bottom:0;
-    z-index:2147483000;
-    width:auto;
-    max-height:min(80dvh, 34rem);
-    margin:0;
-    padding:1rem 1rem calc(1rem + env(safe-area-inset-bottom));
-    border:.0625rem solid var(--ds-color-border);
-    border-bottom:0;
-    border-radius:1rem 1rem 0 0;
-    background:var(--ds-color-surface-2);
-    color:var(--ds-color-text);
-    overflow:auto;
-    box-shadow:0 -1rem 3rem rgba(0,0,0,.34);
-    animation:ds-date-sheet-in .16s ease-out;
-    pointer-events:auto;
-    visibility:visible;
-    opacity:1;
-  }
-
-  .ds-date-field__header { margin-top:.125rem; }
-  .ds-date-field__day { min-height:2.75rem; font-size:.875rem; }
-}
-
-@keyframes ds-date-sheet-in {
-  from { transform:translateY(1rem); opacity:.7; }
-  to { transform:translateY(0); opacity:1; }
 }
 
 @media (prefers-reduced-motion: reduce) {

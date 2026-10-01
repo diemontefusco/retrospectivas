@@ -1,0 +1,60 @@
+<!--
+  RETROS
+  © Todos los derechos reservados.
+  El contenido, diseño y funcionalidades de esta aplicación son propiedad de Diego Gabriel Montefusco.
+-->
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="author" content="Diego Montefusco">
+  <meta name="copyright" content="Copyright © 2026 Diego Montefusco. Todos los derechos reservados.">
+  <title>Retros · MVP</title>
+  <link rel="icon" type="image/x-icon" href="./favicon.ico">
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="css/design-system.css">
+</head>
+<body>
+  <div class="app">
+    <header class="topbar">
+      <div class="brand"><img class="brand-logo" src="./logo.svg" alt=""> <span>RETROS</span></div>
+      <div id="stageIndicator" class="stage-indicator" aria-live="polite" aria-hidden="true">
+        <span id="stageLabel" class="stage-label">Inicio</span>
+        <span id="stageCount" class="stage-count">1/1</span>
+      </div>
+    </header>
+
+    <main id="app"></main>
+
+    <div id="loadingSpinner" class="loading-spinner" aria-hidden="true">
+      <span class="loading-spinner-ring" aria-label="Cargando"></span>
+    </div>
+
+    <footer class="footer">
+      <button id="backBtn" class="ghost">← Atrás</button>
+      <div class="footer-center">
+        <button id="toolFeedbackBtn" class="tool-feedback-cta" type="button">Tu feedback 📢</button>
+      </div>
+      <button id="nextBtn" class="primary">Iniciar</button>
+    </footer>
+
+    <div id="toolFeedbackModal" class="tool-feedback-modal" aria-hidden="true">
+      <div class="tool-feedback-backdrop" data-tool-feedback-close></div>
+      <div class="tool-feedback-dialog" role="dialog" aria-modal="true" aria-labelledby="toolFeedbackTitle">
+        <h2 id="toolFeedbackTitle">¿Qué mejorarías de la herramienta?</h2>
+        <p class="lead">Contanos qué te gustaría cambiar, mejorar o sumar.</p>
+        <textarea id="toolFeedbackInput" maxlength="2000" rows="6" placeholder="Escribí tu sugerencia..."></textarea>
+        <div class="tool-feedback-meta"><span id="toolFeedbackCounter">0 / 2000</span></div>
+        <div class="tool-feedback-actions">
+          <button type="button" class="ghost tool-feedback-cancel" data-tool-feedback-close>Cerrar</button>
+          <button type="button" class="primary" id="toolFeedbackSubmitBtn">Enviar feedback →</button>
+        </div>
+        <div id="toolFeedbackStatus" class="tool-feedback-status" aria-live="polite"></div>
+      </div>
+    </div>
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script type="module" src="app.js?v=01"></script>
+</body>
+</html>

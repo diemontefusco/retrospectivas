@@ -56,6 +56,7 @@ export function mountDateField(input, options = {}) {
   input.className = `${input.className || ""} ds-date-field__input`.trim();
   input.type = "hidden";
   input.id = inputId;
+  input.replaceWith(wrapper);
   wrapper.appendChild(input);
 
   const trigger = document.createElement("button");
@@ -86,7 +87,6 @@ export function mountDateField(input, options = {}) {
   popover.setAttribute("aria-label", options.label || "Seleccionar fecha");
 
   wrapper.append(trigger, backdrop, popover);
-  input.replaceWith(wrapper);
 
   let visibleMonth = parseISO(initialValue) || parseISO(todayLocalISO()) || new Date();
   let selectedValue = initialValue;

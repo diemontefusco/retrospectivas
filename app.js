@@ -28,7 +28,7 @@ import { getTopVotedTopic, getConversationContext } from "./js/domain/voting.js"
 import { buildGeneralGuidingQuestionSuggestions, buildGuidingQuestionSuggestions, questionExists } from "./js/domain/questions.js";
 import { STEPS, getRetroSteps, normalizeStepForTopics, getProgressMeta } from "./js/domain/retroFlow.js";
 import { escapeHtml, todayLocalISO } from "./js/utils/formatters.js";
-import { mountDateFields } from "./js/components/dateField.js";
+import { mountDateFields } from "./js/components/dateField.js?v=04";
 import { landingHome, landingCreateForm, landingSummaryView, landingFeedbackView } from "./js/views/landing/landingView.js";
 import { adminLoginView, adminToolFeedbackRow, adminRetroToolFeedbackRow, adminPanelView } from "./js/views/admin/adminView.js";
 import { lobbyScreen } from "./js/views/retro/lobbyView.js";

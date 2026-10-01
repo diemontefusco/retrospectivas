@@ -48,13 +48,16 @@ export function mountDateField(input, options = {}) {
   const inputId = input.id || `date-${Math.random().toString(36).slice(2)}`;
   const initialValue = input.value || options.value || "";
   const placeholder = options.placeholder || "Seleccioná una fecha";
+
   const wrapper = document.createElement("div");
   wrapper.className = "ds-date-field";
   wrapper.dataset.dsDateField = inputId;
 
   input.dataset.dsDateMounted = "true";
   input.className = `${input.className || ""} ds-date-field__input`.trim();
-  input.type = "hidden";
+  // Keep the native date input type so existing <label for="..."> relationships remain valid.
+  // It is visually hidden by .ds-date-field__input while the custom trigger handles interaction.
+  input.type = "date";
   input.id = inputId;
   input.replaceWith(wrapper);
   wrapper.appendChild(input);
@@ -73,11 +76,7 @@ export function mountDateField(input, options = {}) {
   icon.setAttribute("aria-hidden", "true");
   icon.textContent = "📅";
   trigger.append(value, icon);
-
-  const backdrop = document.createElement("div");
-  backdrop.className = "ds-date-field__backdrop";
-  backdrop.hidden = true;
-  backdrop.setAttribute("aria-hidden", "true");
+  wrapper.appendChild(trigger);
 
   const popover = document.createElement("div");
   popover.className = "ds-date-field__popover";
@@ -86,24 +85,37 @@ export function mountDateField(input, options = {}) {
   popover.setAttribute("role", "dialog");
   popover.setAttribute("aria-label", options.label || "Seleccionar fecha");
 
+  // Mobile layer is created once, but only exists in the document while open.
+  // This avoids stale backdrops and stacking-context issues after selecting a date.
   const mobileLayer = document.createElement("div");
   mobileLayer.className = "ds-date-field__mobile-layer";
   mobileLayer.hidden = true;
   mobileLayer.setAttribute("aria-hidden", "true");
-  mobileLayer.append(backdrop, popover);
 
-  wrapper.append(trigger, mobileLayer);
+  const backdrop = document.createElement("button");
+  backdrop.type = "button";
+  backdrop.className = "ds-date-field__backdrop";
+  backdrop.setAttribute("aria-label", "Cerrar selector de fecha");
+  mobileLayer.append(backdrop, popover);
 
   let visibleMonth = parseISO(initialValue) || parseISO(todayLocalISO()) || new Date();
   let selectedValue = initialValue;
   let open = false;
+  let mobileOpen = false;
 
-  function updateValue(emitChange = false) {
+  function isMobile() {
+    return window.matchMedia("(max-width: 47.5rem)").matches;
+  }
+
+  function updateValue() {
     const formatted = formatDisplay(selectedValue, placeholder);
     value.textContent = formatted.text;
     value.classList.toggle("is-placeholder", formatted.placeholder);
     input.value = selectedValue || "";
-    if (emitChange) input.dispatchEvent(new Event("change", { bubbles: true }));
+  }
+
+  function emitChange() {
+    input.dispatchEvent(new Event("change", { bubbles: true }));
   }
 
   function renderCalendar() {
@@ -113,9 +125,9 @@ export function mountDateField(input, options = {}) {
 
     popover.innerHTML = `
       <div class="ds-date-field__header">
-        <button type="button" ${buttonClass("ds-date-field__nav")} data-date-prev aria-label="Mes anterior">‹</button>
+        <button type="button" class="ds-date-field__nav" data-date-prev aria-label="Mes anterior">‹</button>
         <div class="ds-date-field__month" aria-live="polite">${escapeHtml(monthLabel(visibleMonth))}</div>
-        <button type="button" ${buttonClass("ds-date-field__nav")} data-date-next aria-label="Mes siguiente">›</button>
+        <button type="button" class="ds-date-field__nav" data-date-next aria-label="Mes siguiente">›</button>
       </div>
       <div class="ds-date-field__weekdays" aria-hidden="true">
         ${WEEKDAYS.map(day => `<div class="ds-date-field__weekday">${day}</div>`).join("")}
@@ -132,7 +144,7 @@ export function mountDateField(input, options = {}) {
             isToday ? "is-today" : "",
             isSelected ? "is-selected" : ""
           ].filter(Boolean).join(" ");
-          return `<button type="button" class="${classes}" data-date-value="${iso}" aria-label="${iso}" ${isSelected ? 'aria-pressed="true"' : ''}>${day.getDate()}</button>`;
+          return `<button type="button" class="${classes}" data-date-value="${iso}" aria-label="${iso}" ${isSelected ? 'aria-pressed="true"' : ""}>${day.getDate()}</button>`;
         }).join("")}
       </div>
       <div class="ds-date-field__footer">
@@ -141,106 +153,113 @@ export function mountDateField(input, options = {}) {
       </div>
     `;
 
-    popover.querySelector("[data-date-prev]").onclick = () => {
+    popover.querySelector("[data-date-prev]").onclick = (event) => {
+      event.preventDefault();
       visibleMonth = new Date(visibleMonth.getFullYear(), visibleMonth.getMonth() - 1, 1, 12);
       renderCalendar();
     };
-    popover.querySelector("[data-date-next]").onclick = () => {
+
+    popover.querySelector("[data-date-next]").onclick = (event) => {
+      event.preventDefault();
       visibleMonth = new Date(visibleMonth.getFullYear(), visibleMonth.getMonth() + 1, 1, 12);
       renderCalendar();
     };
+
     popover.querySelectorAll("[data-date-value]").forEach(dayButton => {
       dayButton.onclick = (event) => {
         event.preventDefault();
         event.stopPropagation();
-        selectedValue = dayButton.dataset.dateValue;
-        const chosen = parseISO(selectedValue);
-        if (chosen) visibleMonth = new Date(chosen.getFullYear(), chosen.getMonth(), 1, 12);
-        updateValue(false);
-        close();
-        input.dispatchEvent(new Event("change", { bubbles: true }));
-        if (!isMobile()) trigger.focus();
+        selectValue(dayButton.dataset.dateValue);
       };
     });
-    popover.querySelector("[data-date-clear]").onclick = () => {
-      selectedValue = "";
-      updateValue(false);
-      close();
-      input.dispatchEvent(new Event("change", { bubbles: true }));
-      if (!isMobile()) trigger.focus();
+
+    popover.querySelector("[data-date-clear]").onclick = (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      selectValue("");
     };
-    popover.querySelector("[data-date-today]").onclick = () => {
-      selectedValue = todayLocalISO();
-      const chosen = parseISO(selectedValue);
-      visibleMonth = new Date(chosen.getFullYear(), chosen.getMonth(), 1, 12);
-      updateValue(false);
-      close();
-      input.dispatchEvent(new Event("change", { bubbles: true }));
-      if (!isMobile()) trigger.focus();
+
+    popover.querySelector("[data-date-today]").onclick = (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      selectValue(todayLocalISO());
     };
   }
 
-  function isMobile() {
-    return window.matchMedia("(max-width: 47.5rem)").matches;
-  }
+  function selectValue(nextValue) {
+    selectedValue = nextValue || "";
+    const chosen = parseISO(selectedValue);
+    if (chosen) visibleMonth = new Date(chosen.getFullYear(), chosen.getMonth(), 1, 12);
 
-  function portalToBodyIfMobile() {
-    if (!isMobile()) return false;
-    document.body.appendChild(mobileLayer);
-    mobileLayer.hidden = false;
-    mobileLayer.setAttribute("aria-hidden", "false");
-    return true;
-  }
+    // Close the visual layer before notifying the application. Some views rerender
+    // synchronously when the date changes; the layer must already be gone then.
+    close();
+    updateValue();
+    emitChange();
 
-  function restoreToWrapper() {
-    if (mobileLayer.parentElement !== wrapper) wrapper.appendChild(mobileLayer);
-    mobileLayer.hidden = true;
-    mobileLayer.style.display = "none";
-    mobileLayer.setAttribute("aria-hidden", "true");
+    if (!isMobile()) trigger.focus();
   }
 
   function openCalendar() {
     if (open || input.disabled) return;
+
     open = true;
     wrapper.classList.add("is-open");
     trigger.setAttribute("aria-expanded", "true");
-    const mobile = portalToBodyIfMobile();
-    backdrop.hidden = false;
-    popover.hidden = false;
-    if (mobile) {
-      mobileLayer.hidden = false;
-      mobileLayer.style.display = "block";
-      mobileLayer.setAttribute("aria-hidden", "false");
-    }
+
     renderCalendar();
+
+    if (isMobile()) {
+      mobileOpen = true;
+      mobileLayer.hidden = false;
+      mobileLayer.setAttribute("aria-hidden", "false");
+      document.body.appendChild(mobileLayer);
+      popover.hidden = false;
+    } else {
+      mobileOpen = false;
+      wrapper.appendChild(popover);
+      popover.hidden = false;
+    }
+
     document.addEventListener("keydown", onKeydown);
   }
 
   function close() {
-    if (!open) return;
+    if (!open && !mobileOpen) return;
+
     open = false;
+    mobileOpen = false;
     wrapper.classList.remove("is-open");
     trigger.setAttribute("aria-expanded", "false");
-    backdrop.hidden = true;
-    popover.hidden = true;
-    mobileLayer.hidden = true;
-    mobileLayer.style.display = "none";
-    restoreToWrapper();
     document.removeEventListener("keydown", onKeydown);
+
+    // Remove the mobile layer completely instead of leaving a hidden fixed backdrop
+    // in the document. This prevents the transparent black screen from surviving.
+    if (mobileLayer.parentElement) mobileLayer.remove();
+    mobileLayer.hidden = true;
+    mobileLayer.setAttribute("aria-hidden", "true");
+
+    popover.hidden = true;
+    wrapper.appendChild(popover);
   }
 
   function onKeydown(event) {
     if (event.key === "Escape") {
       close();
-      trigger.focus();
+      if (!isMobile()) trigger.focus();
     }
   }
 
+  backdrop.addEventListener("click", (event) => {
+    event.preventDefault();
+    close();
+  });
+
   trigger.addEventListener("click", openCalendar);
-  backdrop.addEventListener("click", close);
+
   input.addEventListener("change", () => {
     selectedValue = input.value || "";
-    updateValue(false);
+    updateValue();
   });
 
   if (input.disabled) wrapper.classList.add("is-disabled");
@@ -254,7 +273,8 @@ export function mountDateField(input, options = {}) {
       selectedValue = nextValue || "";
       const nextDate = parseISO(selectedValue);
       if (nextDate) visibleMonth = new Date(nextDate.getFullYear(), nextDate.getMonth(), 1, 12);
-      updateValue(true);
+      updateValue();
+      emitChange();
     },
     open: openCalendar,
     close,

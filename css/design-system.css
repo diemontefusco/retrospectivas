@@ -181,44 +181,13 @@
 .ds-date-field__footer { display:flex; justify-content:flex-end; gap:var(--ds-space-2); margin-top:var(--ds-space-3); padding-top:var(--ds-space-3); border-top:.0625rem solid var(--ds-color-border); }
 .ds-date-field__footer button { min-height:2.5rem; }
 
-.ds-date-field__backdrop { display:none; }
-.ds-date-field__mobile-layer { display:none; }
-
 @media (max-width: 47.5rem) {
-  .ds-date-field__mobile-layer {
-    display:block;
-    position:fixed;
-    inset:0;
-    z-index:2147483000;
-    pointer-events:auto;
-    isolation:isolate;
-  }
-
-  .ds-date-field__mobile-layer[hidden] { display:none; }
-
-  .ds-date-field__backdrop {
-    display:block;
-    position:absolute;
-    inset:0;
-    z-index:0;
-    width:100%;
-    height:100%;
-    margin:0;
-    padding:0;
-    border:0;
-    border-radius:0;
-    background:rgba(0,0,0,.58);
-    pointer-events:auto;
-    appearance:none;
-    -webkit-appearance:none;
-  }
-
   .ds-date-field__popover {
-    position:absolute;
+    position:fixed;
     left:0;
     right:0;
     bottom:0;
-    z-index:1;
+    z-index:2147483000;
     width:auto;
     max-height:min(80dvh, 34rem);
     margin:0;

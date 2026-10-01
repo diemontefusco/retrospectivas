@@ -85,23 +85,9 @@ export function mountDateField(input, options = {}) {
   popover.setAttribute("role", "dialog");
   popover.setAttribute("aria-label", options.label || "Seleccionar fecha");
 
-  // Mobile layer is created once, but only exists in the document while open.
-  // This avoids stale backdrops and stacking-context issues after selecting a date.
-  const mobileLayer = document.createElement("div");
-  mobileLayer.className = "ds-date-field__mobile-layer";
-  mobileLayer.hidden = true;
-  mobileLayer.setAttribute("aria-hidden", "true");
-
-  const backdrop = document.createElement("button");
-  backdrop.type = "button";
-  backdrop.className = "ds-date-field__backdrop";
-  backdrop.setAttribute("aria-label", "Cerrar selector de fecha");
-  mobileLayer.append(backdrop, popover);
-
   let visibleMonth = parseISO(initialValue) || parseISO(todayLocalISO()) || new Date();
   let selectedValue = initialValue;
   let open = false;
-  let mobileOpen = false;
 
   function isMobile() {
     return window.matchMedia("(max-width: 47.5rem)").matches;
@@ -191,8 +177,8 @@ export function mountDateField(input, options = {}) {
     const chosen = parseISO(selectedValue);
     if (chosen) visibleMonth = new Date(chosen.getFullYear(), chosen.getMonth(), 1, 12);
 
-    // Close the visual layer before notifying the application. Some views rerender
-    // synchronously when the date changes; the layer must already be gone then.
+    // Close before notifying the application. The mobile popover is attached
+    // directly to <body>, so there is no backdrop layer left behind.
     close();
     updateValue();
     emitChange();
@@ -203,6 +189,9 @@ export function mountDateField(input, options = {}) {
   function openCalendar() {
     if (open || input.disabled) return;
 
+    // Clean up any stale mobile date popovers from a previous render.
+    document.querySelectorAll(".ds-date-field__popover.is-mobile-date-popover").forEach(node => node.remove());
+
     open = true;
     wrapper.classList.add("is-open");
     trigger.setAttribute("aria-expanded", "true");
@@ -210,13 +199,11 @@ export function mountDateField(input, options = {}) {
     renderCalendar();
 
     if (isMobile()) {
-      mobileOpen = true;
-      mobileLayer.hidden = false;
-      mobileLayer.setAttribute("aria-hidden", "false");
-      document.body.appendChild(mobileLayer);
+      popover.classList.add("is-mobile-date-popover");
       popover.hidden = false;
+      document.body.appendChild(popover);
     } else {
-      mobileOpen = false;
+      popover.classList.remove("is-mobile-date-popover");
       wrapper.appendChild(popover);
       popover.hidden = false;
     }
@@ -225,21 +212,18 @@ export function mountDateField(input, options = {}) {
   }
 
   function close() {
-    if (!open && !mobileOpen) return;
+    if (!open) return;
 
     open = false;
-    mobileOpen = false;
     wrapper.classList.remove("is-open");
     trigger.setAttribute("aria-expanded", "false");
     document.removeEventListener("keydown", onKeydown);
 
-    // Remove the mobile layer completely instead of leaving a hidden fixed backdrop
-    // in the document. This prevents the transparent black screen from surviving.
-    if (mobileLayer.parentElement) mobileLayer.remove();
-    mobileLayer.hidden = true;
-    mobileLayer.setAttribute("aria-hidden", "true");
-
     popover.hidden = true;
+    popover.classList.remove("is-mobile-date-popover");
+    if (popover.parentElement === document.body) {
+      popover.remove();
+    }
     wrapper.appendChild(popover);
   }
 
@@ -249,11 +233,6 @@ export function mountDateField(input, options = {}) {
       if (!isMobile()) trigger.focus();
     }
   }
-
-  backdrop.addEventListener("click", (event) => {
-    event.preventDefault();
-    close();
-  });
 
   trigger.addEventListener("click", openCalendar);
 

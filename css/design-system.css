@@ -1,0 +1,223 @@
+/* =========================================================
+   RETROS DESIGN SYSTEM v1
+   Foundations + form primitives + DateField
+   ========================================================= */
+
+:root {
+  /* Color */
+  --ds-color-bg: var(--bg, #090a0d);
+  --ds-color-surface-1: var(--panel, #111318);
+  --ds-color-surface-2: var(--panel2, #171922);
+  --ds-color-surface-3: #20232b;
+  --ds-color-text: var(--text, #f5f6f7);
+  --ds-color-text-secondary: #b8bdc7;
+  --ds-color-text-muted: var(--muted, #9297a3);
+  --ds-color-border: var(--line, #292d37);
+  --ds-color-border-strong: #3a3f4b;
+  --ds-color-primary: var(--primary, #a07ffe);
+  --ds-color-primary-hover: var(--primary-hover, #bea7ff);
+  --ds-color-primary-soft: var(--primary-soft, rgba(160,127,254,.12));
+  --ds-color-danger: var(--red, #ff8e8e);
+
+  /* Typography */
+  --ds-font-size-xs: .75rem;
+  --ds-font-size-sm: .875rem;
+  --ds-font-size-md: 1rem;
+  --ds-font-size-lg: 1.125rem;
+  --ds-font-size-xl: 1.5rem;
+  --ds-line-tight: 1.1;
+  --ds-line-normal: 1.5;
+
+  /* Spacing */
+  --ds-space-1: .25rem;
+  --ds-space-2: .5rem;
+  --ds-space-3: .75rem;
+  --ds-space-4: 1rem;
+  --ds-space-5: 1.25rem;
+  --ds-space-6: 1.5rem;
+  --ds-space-7: 2rem;
+  --ds-space-8: 2.5rem;
+  --ds-space-9: 3rem;
+
+  /* Shape */
+  --ds-radius-sm: .5rem;
+  --ds-radius-md: .75rem;
+  --ds-radius-lg: 1rem;
+  --ds-radius-xl: 1.25rem;
+  --ds-radius-full: 999rem;
+
+  /* Interaction */
+  --ds-control-height: 3rem;
+  --ds-touch-target: 2.75rem;
+  --ds-focus-ring: 0 0 0 .1875rem rgba(160,127,254,.2);
+  --ds-overlay: rgba(0,0,0,.58);
+  --ds-z-popover: 1000;
+  --ds-z-sheet: 1100;
+  --ds-z-modal: 1200;
+}
+
+/* ---------- Generic form primitives ---------- */
+.ds-field {
+  display: grid;
+  gap: var(--ds-space-2);
+  min-width: 0;
+}
+
+.ds-field__label {
+  display: block;
+  color: var(--ds-color-text-secondary);
+  font-size: var(--ds-font-size-xs);
+  font-weight: 700;
+  line-height: var(--ds-line-tight);
+  letter-spacing: .04em;
+  text-transform: uppercase;
+}
+
+.ds-field__required { color: var(--ds-color-primary); }
+.ds-field__hint { color: var(--ds-color-text-muted); font-size: var(--ds-font-size-xs); line-height: var(--ds-line-normal); }
+.ds-field__error { color: var(--ds-color-danger); font-size: var(--ds-font-size-xs); line-height: var(--ds-line-normal); }
+
+.ds-control {
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  min-height: var(--ds-control-height);
+  padding: .75rem .875rem;
+  border: .0625rem solid var(--ds-color-border);
+  border-radius: var(--ds-radius-md);
+  outline: none;
+  background: var(--ds-color-surface-1);
+  color: var(--ds-color-text);
+  font: inherit;
+  font-size: var(--ds-font-size-md);
+  line-height: 1.35;
+  transition: border-color .16s ease, box-shadow .16s ease, background .16s ease;
+}
+
+.ds-control::placeholder { color: var(--ds-color-text-muted); }
+.ds-control:hover { border-color: var(--ds-color-border-strong); }
+.ds-control:focus { border-color: var(--ds-color-primary); box-shadow: var(--ds-focus-ring); }
+.ds-control:disabled { opacity: .55; cursor: not-allowed; }
+
+/* ---------- DateField ---------- */
+.ds-date-field {
+  position: relative;
+  width: 100%;
+  min-width: 0;
+}
+
+.ds-date-field__input {
+  position: absolute !important;
+  width: .0625rem !important;
+  height: .0625rem !important;
+  margin: -.0625rem !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}
+
+.ds-date-field__trigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--ds-space-3);
+  box-sizing: border-box;
+  width: 100%;
+  min-height: var(--ds-control-height);
+  padding: .75rem .875rem;
+  border: .0625rem solid var(--ds-color-border);
+  border-radius: var(--ds-radius-md);
+  outline: none;
+  background: var(--ds-color-surface-1);
+  color: var(--ds-color-text);
+  font: inherit;
+  font-size: var(--ds-font-size-md);
+  line-height: 1.35;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color .16s ease, box-shadow .16s ease, background .16s ease;
+}
+
+.ds-date-field__trigger:hover { border-color: var(--ds-color-border-strong); }
+.ds-date-field__trigger:focus-visible,
+.ds-date-field.is-open .ds-date-field__trigger {
+  border-color: var(--ds-color-primary);
+  box-shadow: var(--ds-focus-ring);
+}
+.ds-date-field.is-disabled .ds-date-field__trigger { opacity: .55; cursor: not-allowed; }
+.ds-date-field__value.is-placeholder { color: var(--ds-color-text-muted); }
+.ds-date-field__icon { flex: 0 0 auto; color: var(--ds-color-text-secondary); font-size: 1.05rem; line-height: 1; }
+
+.ds-date-field__popover {
+  position: absolute;
+  top: calc(100% + .5rem);
+  left: 0;
+  z-index: var(--ds-z-popover);
+  width: min(21rem, calc(100vw - 2rem));
+  padding: var(--ds-space-4);
+  border: .0625rem solid var(--ds-color-border);
+  border-radius: var(--ds-radius-lg);
+  background: var(--ds-color-surface-2);
+  box-shadow: 0 1rem 3rem rgba(0,0,0,.34);
+}
+
+.ds-date-field__popover[hidden] { display: none; }
+.ds-date-field__header { display:flex; align-items:center; justify-content:space-between; gap:var(--ds-space-2); margin-bottom:var(--ds-space-3); }
+.ds-date-field__month { flex:1; min-width:0; color:var(--ds-color-text); font-weight:700; text-align:center; text-transform:capitalize; }
+.ds-date-field__nav { width:var(--ds-touch-target); height:var(--ds-touch-target); padding:0; border:.0625rem solid var(--ds-color-border); border-radius:var(--ds-radius-sm); background:transparent; color:var(--ds-color-text); cursor:pointer; }
+.ds-date-field__nav:hover { border-color:var(--ds-color-primary); background:var(--ds-color-primary-soft); }
+.ds-date-field__weekdays,
+.ds-date-field__grid { display:grid; grid-template-columns:repeat(7, minmax(0, 1fr)); gap:.25rem; }
+.ds-date-field__weekdays { margin-bottom:.25rem; }
+.ds-date-field__weekday { color:var(--ds-color-text-muted); font-size:.6875rem; font-weight:700; text-align:center; text-transform:uppercase; }
+.ds-date-field__day { min-width:0; aspect-ratio:1; padding:0; border:0; border-radius:var(--ds-radius-sm); background:transparent; color:var(--ds-color-text); font:inherit; font-size:.8125rem; cursor:pointer; }
+.ds-date-field__day:hover { background:var(--ds-color-primary-soft); }
+.ds-date-field__day:focus-visible { outline:.125rem solid var(--ds-color-primary); outline-offset:.0625rem; }
+.ds-date-field__day.is-other-month { color:var(--ds-color-text-muted); opacity:.5; }
+.ds-date-field__day.is-today { box-shadow:inset 0 0 0 .0625rem var(--ds-color-primary); }
+.ds-date-field__day.is-selected { background:var(--ds-color-primary); color:#fff; font-weight:700; }
+.ds-date-field__footer { display:flex; justify-content:flex-end; gap:var(--ds-space-2); margin-top:var(--ds-space-3); padding-top:var(--ds-space-3); border-top:.0625rem solid var(--ds-color-border); }
+.ds-date-field__footer button { min-height:2.5rem; }
+
+.ds-date-field__backdrop { display:none; }
+.ds-date-field__sheet { display:contents; }
+
+@media (max-width: 47.5rem) {
+  .ds-date-field__popover {
+    position: fixed;
+    inset: auto 0 0;
+    width: auto;
+    max-height: min(80dvh, 34rem);
+    margin: 0;
+    padding: 1rem 1rem calc(1rem + env(safe-area-inset-bottom));
+    border-radius: 1rem 1rem 0 0;
+    overflow:auto;
+    box-shadow: 0 -1rem 3rem rgba(0,0,0,.34);
+    animation: ds-date-sheet-in .16s ease-out;
+  }
+
+  .ds-date-field__backdrop {
+    display:block;
+    position:fixed;
+    inset:0;
+    z-index:calc(var(--ds-z-sheet) - 1);
+    background:var(--ds-overlay);
+  }
+
+  .ds-date-field__popover { z-index:var(--ds-z-sheet); }
+  .ds-date-field__header { margin-top:.125rem; }
+  .ds-date-field__day { min-height:2.75rem; font-size:.875rem; }
+}
+
+@keyframes ds-date-sheet-in {
+  from { transform:translateY(1rem); opacity:.7; }
+  to { transform:translateY(0); opacity:1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ds-date-field__popover { animation:none; }
+  .ds-control,
+  .ds-date-field__trigger { transition:none; }
+}

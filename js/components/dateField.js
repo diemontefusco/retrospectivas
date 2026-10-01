@@ -190,25 +190,15 @@ export function mountDateField(input, options = {}) {
   function openCalendar() {
     if (open || input.disabled) return;
 
-    // On mobile, use the browser's native date picker. This avoids overlay/stacking
-    // issues on iOS/Android and keeps the field fully touch-native.
-    if (isMobile()) {
-      try {
-        if (typeof input.showPicker === "function") input.showPicker();
-        else input.click();
-      } catch {
-        input.click();
-      }
-      return;
-    }
-
+    // Mobile uses the same custom calendar, rendered inline inside the field.
+    // This avoids fullscreen overlays and browser-specific native picker behavior.
     open = true;
     wrapper.classList.add("is-open");
     trigger.setAttribute("aria-expanded", "true");
 
     renderCalendar();
 
-    popover.classList.remove("is-mobile-date-popover");
+    popover.classList.toggle("is-mobile-date-popover", isMobile());
     wrapper.appendChild(popover);
     popover.hidden = false;
 

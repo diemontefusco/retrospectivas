@@ -186,46 +186,36 @@
     position: relative;
   }
 
-  /* On mobile the native date input is the actual interactive control.
-     This avoids custom overlays and lets iOS/Android open their native picker. */
+  /* Mobile uses the same custom calendar inline, without a fullscreen overlay. */
   .ds-date-field__input {
-    position: relative !important;
-    inset: auto !important;
-    display: block !important;
-    box-sizing: border-box !important;
-    width: 100% !important;
-    height: var(--ds-control-height) !important;
-    margin: 0 !important;
-    padding: .75rem 2.75rem .75rem .875rem !important;
-    overflow: visible !important;
-    clip: auto !important;
-    clip-path: none !important;
-    white-space: normal !important;
-    border: .0625rem solid var(--ds-color-border) !important;
-    border-radius: var(--ds-radius-md) !important;
-    background: var(--ds-color-surface-1) !important;
-    color: var(--ds-color-text) !important;
-    font: inherit !important;
-    font-size: var(--ds-font-size-md) !important;
-    line-height: 1.35 !important;
-    opacity: 1 !important;
-    z-index: 2 !important;
-    cursor: pointer !important;
-    appearance: auto !important;
-    -webkit-appearance: auto !important;
-  }
-
-  .ds-date-field__input:focus {
-    border-color: var(--ds-color-primary) !important;
-    box-shadow: var(--ds-focus-ring) !important;
-    outline: none !important;
+    position: absolute !important;
+    width: .0625rem !important;
+    height: .0625rem !important;
+    margin: -.0625rem !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+    clip: rect(0, 0, 0, 0) !important;
+    white-space: nowrap !important;
+    border: 0 !important;
   }
 
   .ds-date-field__trigger {
-    display: none;
+    display: flex;
   }
 
   .ds-date-field__popover {
+    position: relative;
+    top: auto;
+    left: auto;
+    z-index: auto;
+    width: 100%;
+    margin-top: .5rem;
+    padding: var(--ds-space-4);
+    box-sizing: border-box;
+    box-shadow: none;
+  }
+
+  .ds-date-field__popover[hidden] {
     display: none !important;
   }
 }

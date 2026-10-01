@@ -210,6 +210,46 @@ export function mountDateField(input, options = {}) {
     popover.style.top = `${Math.max(margin, Math.min(top, viewportHeight - popoverHeight - margin))}px`;
   }
 
+  function resetDesktopPopover() {
+    wrapper.appendChild(popover);
+    popover.classList.remove("is-mobile-date-popover");
+    popover.style.position = "";
+    popover.style.zIndex = "";
+    popover.style.width = "";
+    popover.style.left = "";
+    popover.style.top = "";
+    popover.style.margin = "";
+    window.removeEventListener("scroll", positionMobilePopover, true);
+  }
+
+  function syncPopoverMode() {
+    if (!open) return;
+
+    const mobile = isMobile();
+
+    if (mobile) {
+      // When the viewport switches to mobile while the calendar is already open,
+      // move it to <body> before positioning it. This also handles Chrome DevTools
+      // entering mobile emulation without closing the calendar.
+      popover.classList.add("is-mobile-date-popover");
+      if (popover.parentElement !== document.body) {
+        document.body.appendChild(popover);
+      }
+      popover.style.position = "fixed";
+      popover.style.zIndex = "2147483000";
+      popover.style.margin = "0";
+      window.addEventListener("scroll", positionMobilePopover, true);
+      requestAnimationFrame(positionMobilePopover);
+      return;
+    }
+
+    // If DevTools leaves mobile emulation while the calendar is open, restore
+    // the desktop DOM/positioning instead of keeping the mobile fixed coordinates.
+    if (popover.parentElement === document.body || popover.classList.contains("is-mobile-date-popover")) {
+      resetDesktopPopover();
+    }
+  }
+
   function openCalendar() {
     if (open || input.disabled) return;
 
@@ -218,29 +258,9 @@ export function mountDateField(input, options = {}) {
     trigger.setAttribute("aria-expanded", "true");
 
     renderCalendar();
-
-    const mobile = isMobile();
-    popover.classList.toggle("is-mobile-date-popover", mobile);
     popover.hidden = false;
-
-    if (mobile) {
-      // Portal the calendar to <body> so no parent overflow/stacking context
-      // can clip it on iOS Safari/WebKit or Chrome for iOS. No backdrop is used.
-      document.body.appendChild(popover);
-      popover.style.position = "fixed";
-      popover.style.zIndex = "2147483000";
-      popover.style.margin = "0";
-      requestAnimationFrame(positionMobilePopover);
-      window.addEventListener("resize", positionMobilePopover);
-      window.addEventListener("scroll", positionMobilePopover, true);
-    } else {
-      wrapper.appendChild(popover);
-      popover.style.position = "";
-      popover.style.zIndex = "";
-      popover.style.width = "";
-      popover.style.left = "";
-      popover.style.top = "";
-    }
+    syncPopoverMode();
+    window.addEventListener("resize", syncPopoverMode);
 
     document.addEventListener("keydown", onKeydown);
   }
@@ -255,15 +275,9 @@ export function mountDateField(input, options = {}) {
 
     popover.hidden = true;
     popover.classList.remove("is-mobile-date-popover");
-    window.removeEventListener("resize", positionMobilePopover);
+    window.removeEventListener("resize", syncPopoverMode);
     window.removeEventListener("scroll", positionMobilePopover, true);
-    popover.style.position = "";
-    popover.style.zIndex = "";
-    popover.style.width = "";
-    popover.style.left = "";
-    popover.style.top = "";
-    popover.style.margin = "";
-    wrapper.appendChild(popover);
+    resetDesktopPopover();
   }
 
   function onKeydown(event) {
